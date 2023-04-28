@@ -20,10 +20,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ShowPlayerNetRole(APawn* InPawn);
 
+	UFUNCTION(BlueprintCallable)
+	void UpdataPlayerName(APawn* InPawn);
+
 public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* DisplayText;
 
 protected:
 	virtual void NativeDestruct() override;
+
+private:
 };
