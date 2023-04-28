@@ -47,7 +47,7 @@ protected:
 	);
 
 public:	
-
+	FORCEINLINE void SetWeaponState(EWeaponState State) { WeaponState = State; }
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh;
