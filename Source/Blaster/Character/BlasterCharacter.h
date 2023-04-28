@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "BlasterCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCharacterCreateComplete, APawn* ,InPawn);
+
 UCLASS()
 class BLASTER_API ABlasterCharacter : public ACharacter
 {
@@ -34,6 +36,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* OverheadWidget;
 
+	FOnCharacterCreateComplete OnCharacterCreateComplete;
 public:	
 
 };

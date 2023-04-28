@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Blaster/HUD/OverheadWidget.h"
 
 ABlasterCharacter::ABlasterCharacter()
 {
