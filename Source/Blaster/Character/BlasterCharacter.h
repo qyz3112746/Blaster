@@ -6,8 +6,6 @@
 #include "GameFramework/Character.h"
 #include "BlasterCharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCharacterCreateComplete, APawn* ,InPawn);
-
 UCLASS()
 class BLASTER_API ABlasterCharacter : public ACharacter
 {
@@ -17,6 +15,7 @@ public:
 	ABlasterCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -36,7 +35,11 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* OverheadWidget;
 
-	FOnCharacterCreateComplete OnCharacterCreateComplete;
-public:	
+	UPROPERTY(ReplicatedUsing = OnRep_OverLappingWeapon)
+	class AWeapon* OverlappingWeapon;
 
+	UFUNCTION()
+	void OnRep_OverLappingWeapon(AWeapon* LastWeapon);
+public:	
+	void SetOverlappingWeapon(AWeapon* Weapon);
 };
