@@ -159,4 +159,7 @@ void ABlasterCharacter::OnRep_OverLappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
-
+bool ABlasterCharacter::IsWeaponEquipped()
+{
+	return (Combat && Combat->EquippedWeapon);
+}
