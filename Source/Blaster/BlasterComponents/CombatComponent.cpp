@@ -107,9 +107,11 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if (!TraceHitResult.bBlockingHit)
 		{
 			TraceHitResult.ImpactPoint = End;
+			HitResult = End;
 		}
 		else
 		{
+			HitResult = TraceHitResult.ImpactPoint;
 			DrawDebugSphere(
 				GetWorld(),
 				TraceHitResult.ImpactPoint,
@@ -135,7 +137,7 @@ void UCombatComponent::MulticastFire_Implementation()
 	if (Character)
 	{
 		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire();
+		EquippedWeapon->Fire(HitResult);
 	}
 }
 
@@ -143,8 +145,8 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FHitResult HitResult;
-	TraceUnderCrosshairs(HitResult);
+	FHitResult LocalHitResult;
+	TraceUnderCrosshairs(LocalHitResult);
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)

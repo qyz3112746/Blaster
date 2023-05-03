@@ -56,6 +56,8 @@ private:
 	float AimWalkSpeed;
 
 	bool bFrieButtonPressed;
+
+	FVector HitResult;
 public:	
 	
 
