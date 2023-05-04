@@ -63,7 +63,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 			if (EquippedWeapon)
 			{
 				HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;	
-				HUDPackage.CrosshairsTop = EquippedWeapon->CrosshairsCenter;
+				HUDPackage.CrosshairsTop = EquippedWeapon->CrosshairsTop;
 				HUDPackage.CrosshairsLeft = EquippedWeapon->CrosshairsLeft;
 				HUDPackage.CrosshairsRight = EquippedWeapon->CrosshairsRight;
 				HUDPackage.CrosshairsBottom = EquippedWeapon->CrosshairsBottom;
@@ -76,6 +76,28 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				HUDPackage.CrosshairsRight = nullptr;
 				HUDPackage.CrosshairsBottom = nullptr;
 			}
+
+			// Calculate crosshair spread
+
+			// Clamp speed [0,MaxWalkSpeed]->[0,1]
+			FVector2D WalkSpeedRange(0.f, Character->GetCharacterMovement()->MaxWalkSpeed);
+			FVector2D VelocityMultiplierRange(0.f, 1.f);
+			FVector Velocity = Character->GetVelocity();
+			Velocity.Z = 0.f;
+			float Speed = Velocity.Size();
+			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, Speed);
+
+			if (Character->GetCharacterMovement()->IsFalling())
+			{
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 2.25f,DeltaTime,2.25f);
+			}
+			else
+			{
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 0.f, DeltaTime, 30.f);
+			}
+
+			HUDPackage.CrosshairSpread = CrosshairVelocityFactor + CrosshairInAirFactor;
+
 			HUD->SetHUDPackage(HUDPackage);
 		}
 	}
@@ -144,12 +166,17 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		FVector Start = CrosshairWorldPosition;
 		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
 
-		GetWorld()->LineTraceSingleByChannel(
+		bool IsHitSuccessful = GetWorld()->LineTraceSingleByChannel(
 			TraceHitResult,
 			Start,
 			End,
 			ECollisionChannel::ECC_Visibility
 		);
+
+		if (!IsHitSuccessful)
+		{
+			TraceHitResult.ImpactPoint = End;
+		}
 	}
 }
 
