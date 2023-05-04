@@ -20,8 +20,8 @@ UCLASS()
 class BLASTER_API AWeapon : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	AWeapon();
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -33,65 +33,77 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-	virtual void OnSphereOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult
-	);
+		virtual void OnSphereOverlap(
+			UPrimitiveComponent* OverlappedComponent,
+			AActor* OtherActor,
+			UPrimitiveComponent* OtherComp,
+			int32 OtherBodyIndex,
+			bool bFromSweep,
+			const FHitResult& SweepResult
+		);
 
 	UFUNCTION()
-	void OnSphereEndOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex
-	);
+		void OnSphereEndOverlap(
+			UPrimitiveComponent* OverlappedComponent,
+			AActor* OtherActor,
+			UPrimitiveComponent* OtherComp,
+			int32 OtherBodyIndex
+		);
 
-public:	
+public:
 	/**
 	*  Textures for the weapon crosshairs
 	*/
 	UPROPERTY(EditAnywhere, Category = "Crosshairs")
-	class UTexture2D* CrosshairsCenter;
+		class UTexture2D* CrosshairsCenter;
 
 	UPROPERTY(EditAnywhere, Category = "Crosshairs")
-	UTexture2D* CrosshairsLeft;
+		UTexture2D* CrosshairsLeft;
 
 	UPROPERTY(EditAnywhere, Category = "Crosshairs")
-	UTexture2D* CrosshairsRight;
+		UTexture2D* CrosshairsRight;
 
 	UPROPERTY(EditAnywhere, Category = "Crosshairs")
-	UTexture2D* CrosshairsTop;
+		UTexture2D* CrosshairsTop;
 
 	UPROPERTY(EditAnywhere, Category = "Crosshairs")
-	UTexture2D* CrosshairsBottom;
+		UTexture2D* CrosshairsBottom;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-	USkeletalMeshComponent* WeaponMesh;
+		USkeletalMeshComponent* WeaponMesh;
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-	class USphereComponent* AreaSphere;
+		class USphereComponent* AreaSphere;
 
-	UPROPERTY(ReplicatedUsing = OnRep_WeaponState,VisibleAnywhere, Category = "Weapon Properties")
-	EWeaponState WeaponState;
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon Properties")
+		EWeaponState WeaponState;
 
 	UFUNCTION()
-	void OnRep_WeaponState();
+		void OnRep_WeaponState();
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-	class UWidgetComponent* PickupWidget;
+		class UWidgetComponent* PickupWidget;
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
-	class UAnimationAsset* FireAnimation;
+		class UAnimationAsset* FireAnimation;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class ACasing> CasingClass;
+		TSubclassOf<class ACasing> CasingClass;
+
+	/**
+	* Zoomed FOV while aiming
+	*/
+
+	UPROPERTY(EditAnywhere)
+		float ZoomedFOV = 30.f;
+
+	UPROPERTY(EditAnywhere)
+		float ZoomInterpSpeed = 20.f;
 
 public:
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
+	FORCEINLINE float GetZoomedFOV() const {return ZoomedFOV;}
+	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 };
