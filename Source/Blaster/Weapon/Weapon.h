@@ -55,55 +55,78 @@ public:
 	*  Textures for the weapon crosshairs
 	*/
 	UPROPERTY(EditAnywhere, Category = "Crosshairs")
-		class UTexture2D* CrosshairsCenter;
+	class UTexture2D* CrosshairsCenter;
 
 	UPROPERTY(EditAnywhere, Category = "Crosshairs")
-		UTexture2D* CrosshairsLeft;
+	UTexture2D* CrosshairsLeft;
 
 	UPROPERTY(EditAnywhere, Category = "Crosshairs")
-		UTexture2D* CrosshairsRight;
+	UTexture2D* CrosshairsRight;
 
 	UPROPERTY(EditAnywhere, Category = "Crosshairs")
-		UTexture2D* CrosshairsTop;
+	UTexture2D* CrosshairsTop;
 
 	UPROPERTY(EditAnywhere, Category = "Crosshairs")
-		UTexture2D* CrosshairsBottom;
+	UTexture2D* CrosshairsBottom;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-		USkeletalMeshComponent* WeaponMesh;
+	USkeletalMeshComponent* WeaponMesh;
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-		class USphereComponent* AreaSphere;
+	class USphereComponent* AreaSphere;
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon Properties")
-		EWeaponState WeaponState;
+	EWeaponState WeaponState;
 
 	UFUNCTION()
-		void OnRep_WeaponState();
+	void OnRep_WeaponState();
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-		class UWidgetComponent* PickupWidget;
+	class UWidgetComponent* PickupWidget;
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
-		class UAnimationAsset* FireAnimation;
+	class UAnimationAsset* FireAnimation;
 
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<class ACasing> CasingClass;
+	TSubclassOf<class ACasing> CasingClass;
 
 	/**
 	* Zoomed FOV while aiming
 	*/
 
 	UPROPERTY(EditAnywhere)
-		float ZoomedFOV = 30.f;
+	float ZoomedFOV = 30.f;
 
 	UPROPERTY(EditAnywhere)
-		float ZoomInterpSpeed = 20.f;
+	float ZoomInterpSpeed = 20.f;
+
+	UPROPERTY(EditAnywhere, Category = "Crosshairs")
+	float CrosshairInAirFactor = 2.25f;
+
+	UPROPERTY(EditAnywhere, Category = "Crosshairs")
+	float CrosshairAimFactor = 0.58f;
+
+	UPROPERTY(EditAnywhere, Category = "Crosshairs")
+	float CrosshairShootingFactor = 0.75f;
+
+	UPROPERTY(EditAnywhere, Category = "Crosshairs")
+	float CrosshairShootingBackFactor = 4.f;
+
+	UPROPERTY(EditAnywhere, Category = "Crosshairs")
+	float CrosshairShootingMaxFactor = 3.f;
 
 public:
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
+
+	FORCEINLINE float GetCrosshairInAirFactor() const { return CrosshairInAirFactor; }
+	FORCEINLINE float GetCrosshairAimFactor() const { return CrosshairAimFactor; }
+	FORCEINLINE float GetCrosshairShootingFactor() const { return CrosshairShootingFactor; }
+	FORCEINLINE float GetCrosshairShootingBackFactor() const { return CrosshairShootingBackFactor; }
+	FORCEINLINE float GetCrosshairShootingMaxFactor() const { return CrosshairShootingMaxFactor; }
+
 	FORCEINLINE float GetZoomedFOV() const {return ZoomedFOV;}
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
+
 };
