@@ -43,6 +43,10 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* FollowCamera;
 
+	// Hide camera if distance less than threshold.
+	UPROPERTY(EditAnywhere, Category = Camera)
+	float CameraThreshold = 200.f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* OverheadWidget;
 
@@ -71,6 +75,8 @@ private:
 	void ServerEquipButtonPressed();
 
 	void TurnInPlace(float DeltaTime);
+
+	void HideCameraIfCharacterClose();
 
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);
