@@ -78,11 +78,10 @@ void UCombatComponent::Fire()
 		ServerFire(HitTarget);
 		if (EquippedWeapon)
 		{
+			StartFireTimer();
 			CrosshairShootingFactor += EquippedWeapon->GetCrosshairShootingFactor();
 			CrosshairShootingFactor = UKismetMathLibrary::FMin(EquippedWeapon->GetCrosshairShootingMaxFactor(), CrosshairShootingFactor);
 		}
-		StartFireTimer();
-		bCanFire = false;
 	}
 }
 
@@ -110,7 +109,7 @@ void UCombatComponent::StartFireTimer()
 	{
 		return;
 	}
-	
+	bCanFire = false;
 	Character->GetWorldTimerManager().SetTimer(
 		FireTimer,
 		this,

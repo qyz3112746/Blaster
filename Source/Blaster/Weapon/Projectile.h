@@ -37,6 +37,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ImpactSound;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* HitSound;
+
+	UFUNCTION(NetMulticast,Reliable)
+	void MulticastHitEffect(bool bHitted, const FVector_NetQuantize& HitPoint);
 public:	
 
 };
