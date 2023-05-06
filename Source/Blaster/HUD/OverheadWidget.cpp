@@ -5,6 +5,7 @@
 #include "Components/TextBlock.h"
 #include "GameFramework/PlayerState.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "TimerManager.h"
 
 void UOverheadWidget::SetDisplayText(FString TextToDisplay)
 {
@@ -39,13 +40,17 @@ void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
 
 void UOverheadWidget::UpdataPlayerName(APawn* InPawn)
 {
+	LocalPawn = InPawn;
 	APlayerState* PlayerState = InPawn->GetPlayerState();
 	FString Name;
-	if (!PlayerState)
+	if (PlayerState) 
 	{
-		return;
+		Name = PlayerState->GetPlayerName();
 	}
-	Name = PlayerState->GetPlayerName();
+	else
+	{
+		StartUpdateTimer(InPawn);
+	}
 	FString CharacterNameString = FString::Printf(TEXT("Character Name: %s"), *Name);
 	SetDisplayText(CharacterNameString);
 }
@@ -55,4 +60,19 @@ void UOverheadWidget::NativeDestruct()
 {
 	RemoveFromParent();
 	Super::NativeDestruct();
+}
+
+void UOverheadWidget::StartUpdateTimer(APawn* InPawn)
+{
+	InPawn->GetWorldTimerManager().SetTimer(
+		UpdateTimer,
+		this,
+		&UOverheadWidget::UpdateTimerFinished,
+		2.f
+	);
+}
+
+void UOverheadWidget::UpdateTimerFinished()
+{
+	UpdataPlayerName(LocalPawn);
 }

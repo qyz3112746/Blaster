@@ -10,6 +10,7 @@
 #include "Sound/SoundCue.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Blaster/Blaster.h"
+#include "Net/UnrealNetwork.h"
 
 AProjectile::AProjectile()
 {
@@ -53,9 +54,34 @@ void AProjectile::BeginPlay()
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
+	bool bHitted = false;
 	if (BlasterCharacter)
 	{
+		bHitted = true;
 		BlasterCharacter->MulticastHit();
+	}
+	MulticastHitEffect(bHitted, Hit.ImpactPoint);
+}
+
+void AProjectile::MulticastHitEffect_Implementation(bool bHitted, const FVector_NetQuantize& HitPoint)
+{
+	if (!bHitted)
+	{
+		if (ImpactParticles)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, HitPoint);
+		}
+		if (ImpactSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, HitPoint);
+		}
+	}
+	else
+	{
+		if (HitSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, HitSound, HitPoint);
+		}
 	}
 	Destroy();
 }
@@ -64,14 +90,24 @@ void AProjectile::Destroyed()
 {
 	Super::Destroyed();
 
-	if (ImpactParticles)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
-	}
-	if (ImpactSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-	}
+	//if (!bHitted)
+	//{
+	//	if (ImpactParticles)
+	//	{
+	//		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+	//	}
+	//	if (ImpactSound)
+	//	{
+	//		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+	//	}
+	//}
+	//else
+	//{
+	//	if (HitSound)
+	//	{
+	//		UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
+	//	}
+	//}
 }
 
 void AProjectile::Tick(float DeltaTime)

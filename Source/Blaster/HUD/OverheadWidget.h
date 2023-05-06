@@ -31,4 +31,8 @@ protected:
 	virtual void NativeDestruct() override;
 
 private:
+	FTimerHandle UpdateTimer;
+	void StartUpdateTimer(APawn* InPawn);
+	void UpdateTimerFinished();
+	APawn* LocalPawn;
 };
