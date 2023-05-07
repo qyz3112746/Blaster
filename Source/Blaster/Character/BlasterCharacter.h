@@ -98,6 +98,8 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
+	class ABlasterPlayerController* BlasterPlayerController;
+
 private:
 	UFUNCTION()
 	void OnRep_OverLappingWeapon(AWeapon* LastWeapon);
