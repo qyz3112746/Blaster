@@ -41,8 +41,14 @@ private:
 	UPROPERTY(EditAnywhere)
 	USoundCue* HitSound;
 
+private:
+
 	UFUNCTION(NetMulticast,Reliable)
 	void MulticastHitEffect(bool bHitted, const FVector_NetQuantize& HitPoint);
 public:	
+
+protected:
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
 
 };
