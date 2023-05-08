@@ -24,7 +24,7 @@ public:
 	virtual void OnRep_ReplicatedMovement() override;
 
 	UFUNCTION(NetMulticast,Reliable)
-	void Elim();
+	void MulticastElim();
 protected:
 	virtual void BeginPlay() override;
 	virtual void Jump() override;
