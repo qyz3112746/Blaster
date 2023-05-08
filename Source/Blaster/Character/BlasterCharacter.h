@@ -20,8 +20,11 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	void PlayFireMontage(bool bAiming);
+	void PlayElimMontage();
 	virtual void OnRep_ReplicatedMovement() override;
-	void Elim();
+
+	UFUNCTION(NetMulticast,Reliable)
+	void MulticastElim();
 protected:
 	virtual void BeginPlay() override;
 	virtual void Jump() override;
@@ -64,6 +67,8 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class UCombatComponent* Combat;
 
+	bool bElimmed = false;
+
 	//UPROPERTY(Replicated)
 	float AO_Yaw;
 	float InterpAO_Yaw;
@@ -76,7 +81,10 @@ private:
 	class UAnimMontage* FireWeaponMontage;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
-	class UAnimMontage* HitReactMontage;
+	UAnimMontage* HitReactMontage;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ElimMontage;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float TurnThreshold = 0.5f;
@@ -126,4 +134,5 @@ public:
 	FVector GetHitTarget() const;
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
+	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 };
