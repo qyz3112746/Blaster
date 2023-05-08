@@ -22,7 +22,7 @@ public:
 	void PlayFireMontage(bool bAiming);
 	void PlayElimMontage();
 	virtual void OnRep_ReplicatedMovement() override;
-
+	void Elim();
 	UFUNCTION(NetMulticast,Reliable)
 	void MulticastElim();
 protected:
@@ -109,6 +109,14 @@ private:
 	void OnRep_Health();
 
 	class ABlasterPlayerController* BlasterPlayerController;
+
+
+	FTimerHandle ElimTimer;
+
+	UPROPERTY(EditDefaultsOnly)
+	float ElimDelay = 3.f;
+
+	void ElimTiomerFinished();
 
 private:
 	UFUNCTION()
