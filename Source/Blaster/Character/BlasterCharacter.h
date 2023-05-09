@@ -47,6 +47,8 @@ protected:
 	void UpdateHUDHealth();
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
+	// Poll for any relelvant classes and initizlize our HUD
+	void PollInit();
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -155,6 +157,8 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ElimBotSound;
+
+	class ABlasterPlayerState* BlasterPlayerState;
 
 private:
 	UFUNCTION()
