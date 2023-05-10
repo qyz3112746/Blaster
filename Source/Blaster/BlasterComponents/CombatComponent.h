@@ -99,8 +99,12 @@ private:
 	*/
 	FTimerHandle FireTimer;
 	bool bCanFire = true;
+
 	void StartFireTimer();
 	void FireTimerFinished();
+
+	bool CanFire();
+
 
 public:	
 	
