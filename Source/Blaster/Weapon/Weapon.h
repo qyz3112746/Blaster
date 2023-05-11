@@ -32,6 +32,7 @@ public:
 	virtual void Fire(const FVector& HitTarget);
 	void Dropped();
 	void SetWeaponState(EWeaponState State);
+	void AddAmmo(int32 AmmoToAdd);
 protected:
 	virtual void BeginPlay() override;
 
