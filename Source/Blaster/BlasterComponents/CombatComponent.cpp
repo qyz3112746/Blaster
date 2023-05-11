@@ -102,7 +102,7 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 	{
 		return;
 	}
-	if (Character)
+	if (Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
@@ -145,7 +145,7 @@ bool UCombatComponent::CanFire()
 		return false;
 	}
 
-	return bCanFire;
+	return bCanFire && CombatState == ECombatState::ECS_Unoccupied;
 }
 
 void UCombatComponent::OnRep_CarriedAmmo()
@@ -289,6 +289,12 @@ void UCombatComponent::OnRep_CombatState()
 	case ECombatState::ECS_Reloading:
 		HandleReload();
 		break;
+	case ECombatState::ECS_Unoccupied:
+		if (bFireButtonPressed) 
+		{
+			Fire();
+		}
+		break;
 	}
 }
 
@@ -301,6 +307,10 @@ void UCombatComponent::FinishReloading()
 	if (Character->HasAuthority())
 	{
 		CombatState = ECombatState::ECS_Unoccupied;
+	}
+	if (bFireButtonPressed)
+	{
+		Fire();
 	}
 }
 
