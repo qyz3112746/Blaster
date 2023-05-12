@@ -236,6 +236,7 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	if (HandSocket)
 	{
 		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+		UE_LOG(LogTemp, Warning, TEXT("Setting Socket Successfully!"));
 	}
 	EquippedWeapon->SetOwner(Character);
 	EquippedWeapon->SetHUDAmmo();
