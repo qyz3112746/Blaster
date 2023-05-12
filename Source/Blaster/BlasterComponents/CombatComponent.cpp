@@ -165,6 +165,7 @@ void UCombatComponent::OnRep_CarriedAmmo()
 void UCombatComponent::InitializeCarriedAmmo()
 {
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingARAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingRocketAmmo);
 }
 
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
@@ -493,7 +494,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, EquippedWeapon->GetCrosshairShootingBackFactor());
 
 				HUDPackage.CrosshairSpread =
-					0.5f +
+					EquippedWeapon->GetCrosshairBasicSpread() +
 					CrosshairVelocityFactor +
 					CrosshairInAirFactor -
 					CrosshairAimFactor +

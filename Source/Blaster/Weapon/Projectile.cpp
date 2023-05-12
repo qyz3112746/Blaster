@@ -77,6 +77,10 @@ void AProjectile::MulticastHitEffect_Implementation(bool bHitted, const FVector_
 	}
 	else
 	{
+		if (HitParticles)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticles, HitPoint);
+		}
 		if (HitSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, HitSound, HitPoint);

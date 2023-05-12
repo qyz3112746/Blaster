@@ -42,6 +42,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	USoundCue* HitSound;
 
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* HitParticles;
+
 private:
 
 	UFUNCTION(NetMulticast,Reliable)
