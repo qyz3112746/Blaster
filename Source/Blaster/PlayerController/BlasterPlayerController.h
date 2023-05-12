@@ -28,11 +28,11 @@ public:
 
 	void OnMatchStateSet(FName State);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	void HandleMatchHasStarted();
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
 	void PollInit();
-
 	/**
 	* Sync time between client and server
 	*/
