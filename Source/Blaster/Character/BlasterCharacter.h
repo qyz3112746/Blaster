@@ -29,6 +29,9 @@ public:
 	UFUNCTION(NetMulticast,Reliable)
 	void MulticastElim();
 	virtual void Destroyed() override;
+
+	UPROPERTY(Replicated)
+	bool bDisableGameplay = false;
 protected:
 	virtual void BeginPlay() override;
 	virtual void Jump() override;
@@ -52,7 +55,7 @@ protected:
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 	// Poll for any relelvant classes and initizlize our HUD
 	void PollInit();
-
+	void RotateInPlace(float DeltaTime);
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -199,4 +202,6 @@ public:
 	FORCEINLINE float GetHealth () const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	ECombatState GetCombatState() const;
+	FORCEINLINE UCombatComponent* GetCombatComponent() const { return Combat; }
+	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
 };
