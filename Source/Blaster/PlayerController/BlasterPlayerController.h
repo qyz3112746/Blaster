@@ -61,13 +61,17 @@ protected:
 
 	// Report the current server time to the client in response to ServerRequestServerTime
 	UFUNCTION(Client, Reliable)
-	void ClientJoinMidgame(FName StateOfMatch, float Warmup, float Match, float StartingTime);
+	void ClientJoinMidgame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);
 private:
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
 
+	UPROPERTY()
+	class ABlasterGameMode* BlasterGameMode;
+
 	float MatchTime = 0.f;
 	float WarmupTime = 0.f;
+	float CooldownTime = 0.f;
 	float LevelStartingTime = 0.f;
 	uint32 CountdownInt = 0;
 
