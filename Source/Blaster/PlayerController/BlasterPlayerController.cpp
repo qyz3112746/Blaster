@@ -12,7 +12,7 @@
 #include "Blaster/GameMode/BlasterGameMode.h"
 #include "Blaster/HUD/Announcement.h"
 #include "Kismet/GameplayStatics.h"
-
+#include "Blaster/BlasterComponents/CombatComponent.h"
 void ABlasterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -202,7 +202,7 @@ void ABlasterPlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 	{
 		if (CountdownTime < 0.f)
 		{
-			BlasterHUD->CharacterOverlay->MatchCountdownText->SetText(FText());
+			BlasterHUD->Announcement->WarmupTime->SetText(FText());
 			return;
 		}
 
@@ -380,5 +380,11 @@ void ABlasterPlayerController::HandleColldown()
 			BlasterHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
 			BlasterHUD->Announcement->InfoText->SetText(FText());
 		}
+	}
+	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
+	if (BlasterCharacter && BlasterCharacter->GetCombatComponent())
+	{
+		BlasterCharacter->bDisableGameplay = true;
+		BlasterCharacter->GetCombatComponent()->FireButtonPressed(false);
 	}
 }
