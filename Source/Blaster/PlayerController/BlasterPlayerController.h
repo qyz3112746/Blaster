@@ -30,6 +30,7 @@ public:
 	void OnMatchStateSet(FName State);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	void HandleMatchHasStarted();
+	void HandleColldown();
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
