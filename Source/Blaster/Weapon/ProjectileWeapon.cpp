@@ -8,9 +8,19 @@
 void AProjectileWeapon::Fire(const FVector& HitTarget)
 {
 	Super::Fire(HitTarget);
-
 	if (!HasAuthority())
 	{
+		APawn* InstigatorPawn = Cast<APawn>(GetOwner());
+		const auto MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
+		if (MuzzleFlashSocket)
+		{
+			FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+			UE_LOG(LogTemp, Warning, TEXT("Client Socket Location: %f, %f, %f"),
+				SocketTransform.GetLocation().X,
+				SocketTransform.GetLocation().Y,
+				SocketTransform.GetLocation().Z
+			);
+		}
 		return;
 	}
 
