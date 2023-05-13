@@ -17,6 +17,10 @@ public:
 	AProjectileRocket();
 protected:
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	virtual void BeginPlay() override;
+	virtual void OtherImpactEffects() override;
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* TrailSystem;
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -30,4 +34,16 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* RocketMesh;
+
+	UPROPERTY()
+	class UNiagaraComponent* TrailSystemComponent;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ProjectileLoop;
+
+	UPROPERTY(EditAnywhere)
+	class USoundAttenuation* LoopingSoundAttenuation;
+
+	UPROPERTY()
+	class UAudioComponent* ProjectileLoopComponent;
 };
