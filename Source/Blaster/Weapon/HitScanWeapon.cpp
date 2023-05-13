@@ -5,6 +5,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
 {
@@ -18,7 +19,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 	AController* InstigatorController = OwnerPawn->GetController();
 
 	const auto MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
-	if (MuzzleFlashSocket && InstigatorController)
+	if (MuzzleFlashSocket)
 	{
 		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
 		FVector Start = SocketTransform.GetLocation();
@@ -33,22 +34,22 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 				Start,
 				End, ECollisionChannel::ECC_Visibility
 			);
+			FVector BeamEnd = End;
 			if (FireHit.bBlockingHit)
 			{
 				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
-				if (BlasterCharacter)
+
+				if (BlasterCharacter && HasAuthority() && InstigatorController)
 				{
-					if (HasAuthority())
-					{
-						UGameplayStatics::ApplyDamage(
-							BlasterCharacter,
-							Damage,
-							InstigatorController,
-							this,
-							UDamageType::StaticClass()
-						);
-					}
+					UGameplayStatics::ApplyDamage(
+						BlasterCharacter,
+						Damage,
+						InstigatorController,
+						this,
+						UDamageType::StaticClass()
+					);
 				}
+
 				if (ImpactParticles)
 				{
 					UGameplayStatics::SpawnEmitterAtLocation(
@@ -58,8 +59,20 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 						FireHit.ImpactNormal.Rotation() 
 					);
 				}
+				BeamEnd = FireHit.ImpactPoint;
+			}
+			if (BeamParticles)
+			{
+				UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
+					World,
+					BeamParticles,
+					SocketTransform
+				);
+				if (Beam)
+				{
+					Beam->SetVectorParameter(FName("Target"), BeamEnd);
+				}
 			}
 		}
 	}
-
 }
