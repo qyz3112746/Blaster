@@ -77,36 +77,50 @@ void AProjectile::MulticastHitEffect_Implementation(bool bHitted, const FVector_
 	}
 	else
 	{
+		if (HitParticles)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticles, HitPoint);
+		}
 		if (HitSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, HitSound, HitPoint);
 		}
 	}
+
+	OtherImpactEffects();
+
+	if (DestroyTime == 0.f)
+	{
+		Destroy();
+	}
+	else
+	{
+		GetWorldTimerManager().SetTimer(
+			DestroyTimer,
+			this,
+			&ThisClass::DestroyTimerFinished,
+			DestroyTime
+		);
+	}
+}
+
+void AProjectile::OtherImpactEffects()
+{
+	if (CollisionBox)
+	{
+		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+
+void AProjectile::DestroyTimerFinished()
+{
 	Destroy();
 }
 
 void AProjectile::Destroyed()
 {
 	Super::Destroyed();
-
-	//if (!bHitted)
-	//{
-	//	if (ImpactParticles)
-	//	{
-	//		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
-	//	}
-	//	if (ImpactSound)
-	//	{
-	//		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-	//	}
-	//}
-	//else
-	//{
-	//	if (HitSound)
-	//	{
-	//		UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
-	//	}
-	//}
 }
 
 void AProjectile::Tick(float DeltaTime)

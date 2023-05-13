@@ -139,6 +139,7 @@ void ABlasterCharacter::MulticastElim_Implementation()
 
 	// Disable Character movement
 	bDisableGameplay = true;
+	GetCharacterMovement()->DisableMovement();
 	if (Combat)
 	{
 		Combat->FireButtonPressed(false);

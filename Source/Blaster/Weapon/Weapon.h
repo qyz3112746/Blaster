@@ -123,6 +123,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Crosshairs")
 	float CrosshairShootingMaxFactor = 3.f;
 
+	UPROPERTY(EditAnywhere, Category = "Crosshairs")
+	float CrosshairBasicSpread = 0.5;
+
 	/**
 	* Automatic fire
 	*/
@@ -160,6 +163,7 @@ public:
 	FORCEINLINE float GetCrosshairShootingFactor() const { return CrosshairShootingFactor; }
 	FORCEINLINE float GetCrosshairShootingBackFactor() const { return CrosshairShootingBackFactor; }
 	FORCEINLINE float GetCrosshairShootingMaxFactor() const { return CrosshairShootingMaxFactor; }
+	FORCEINLINE float GetCrosshairBasicSpread() const { return CrosshairBasicSpread; }
 
 	FORCEINLINE float GetZoomedFOV() const {return ZoomedFOV;}
 	FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
