@@ -22,6 +22,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class UNiagaraSystem* TrailSystem;
 
+	UPROPERTY(VisibleAnywhere)
+	class URocketMovementComponent* RocketMovementComponent;
+
 private:
 	UPROPERTY(EditAnywhere)
 	float DamageInnerRadius = 200.f;
