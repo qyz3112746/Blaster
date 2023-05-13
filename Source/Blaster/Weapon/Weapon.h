@@ -29,7 +29,7 @@ public:
 	virtual void OnRep_Owner() override;
 	void SetHUDAmmo();
 	void ShowPickupWidget(bool bShowWidget);
-	virtual void Fire(const FVector& HitTarget);
+	virtual void Fire(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& HitTarget);
 	void Dropped();
 	void SetWeaponState(EWeaponState State);
 	void AddAmmo(int32 AmmoToAdd);

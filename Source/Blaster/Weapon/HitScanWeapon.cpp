@@ -6,10 +6,11 @@
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 
-void AHitScanWeapon::Fire(const FVector& HitTarget)
+void AHitScanWeapon::Fire(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& HitTarget)
 {
-	Super::Fire(HitTarget);
+	Super::Fire(SocketLocation,HitTarget);
 
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (OwnerPawn == nullptr)
@@ -22,8 +23,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 	if (MuzzleFlashSocket)
 	{
 		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
-		FVector Start = SocketTransform.GetLocation();
-		FVector End = Start + (HitTarget - Start) * 1.25f;
+		FVector End = SocketLocation + (HitTarget - SocketLocation) * 1.25f;
 
 		FHitResult FireHit;
 		UWorld* World = GetWorld();
@@ -31,23 +31,45 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		{
 			World->LineTraceSingleByChannel(
 				FireHit,
-				Start,
-				End, ECollisionChannel::ECC_Visibility
+				SocketLocation,
+				End, 
+				ECollisionChannel::ECC_Visibility
 			);
 			FVector BeamEnd = End;
 			if (FireHit.bBlockingHit)
 			{
 				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
 
-				if (BlasterCharacter && HasAuthority() && InstigatorController)
+				if (BlasterCharacter){
+					if (HasAuthority() && InstigatorController)
+					{
+						UGameplayStatics::ApplyDamage(
+							BlasterCharacter,
+							Damage,
+							InstigatorController,
+							this,
+							UDamageType::StaticClass()
+						);
+					}
+					if (HitSound)
+					{
+						UGameplayStatics::PlaySoundAtLocation(
+							this,
+							HitSound,
+							FireHit.ImpactPoint
+						);
+					}
+				}
+				else
 				{
-					UGameplayStatics::ApplyDamage(
-						BlasterCharacter,
-						Damage,
-						InstigatorController,
-						this,
-						UDamageType::StaticClass()
-					);
+					if (ImpactSound)
+					{
+						UGameplayStatics::PlaySoundAtLocation(
+							this,
+							ImpactSound,
+							FireHit.ImpactPoint
+						);
+					}
 				}
 
 				if (ImpactParticles)
@@ -66,12 +88,29 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 				UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
 					World,
 					BeamParticles,
-					SocketTransform
+					SocketLocation
 				);
 				if (Beam)
 				{
 					Beam->SetVectorParameter(FName("Target"), BeamEnd);
 				}
+			}
+
+			if (MuzzleFlash)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(
+					World,
+					MuzzleFlash,
+					SocketLocation
+				);
+			}
+			if (FireSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(
+					this,
+					FireSound,
+					SocketLocation
+				);
 			}
 		}
 	}
