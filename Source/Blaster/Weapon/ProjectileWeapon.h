@@ -14,9 +14,10 @@ class BLASTER_API AProjectileWeapon : public AWeapon
 {
 	GENERATED_BODY()
 public:
-	virtual void Fire(const FVector& HitTarget) override;
+	virtual void Fire(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& HitTarget) override;
 private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AProjectile> ProjectileClass;
-	
+
+	void ServerSpawnProjectile(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& HitTarget);
 };

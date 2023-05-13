@@ -42,10 +42,10 @@ protected:
 	void Fire();
 
 	UFUNCTION(Server, Reliable)
-	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
+	void ServerFire(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& TraceHitTarget);
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
+	void MulticastFire(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& TraceHitTarget);
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
@@ -133,6 +133,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	int32 StartingPistolAmmo = 35;
+
+	UPROPERTY(EditAnywhere)
+	int32 StartingSMGAmmo = 105;
 
 	void InitializeCarriedAmmo();
 

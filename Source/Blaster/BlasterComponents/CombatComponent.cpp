@@ -82,22 +82,27 @@ void UCombatComponent::Fire()
 {
 	if (CanFire())
 	{
-		ServerFire(HitTarget);
 		if (EquippedWeapon)
 		{
-			StartFireTimer();
-			CrosshairShootingFactor += EquippedWeapon->GetCrosshairShootingFactor();
-			CrosshairShootingFactor = UKismetMathLibrary::FMin(EquippedWeapon->GetCrosshairShootingMaxFactor(), CrosshairShootingFactor);
+			const auto MuzzleFlashSocket = EquippedWeapon->GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
+			if (MuzzleFlashSocket)
+			{
+				FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(EquippedWeapon->GetWeaponMesh());
+				ServerFire(SocketTransform.GetLocation(),HitTarget);
+				StartFireTimer();
+				CrosshairShootingFactor += EquippedWeapon->GetCrosshairShootingFactor();
+				CrosshairShootingFactor = UKismetMathLibrary::FMin(EquippedWeapon->GetCrosshairShootingMaxFactor(), CrosshairShootingFactor);
+			}
 		}
 	}
 }
 
-void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& SocketLocation,const FVector_NetQuantize& TraceHitTarget)
 {
-	MulticastFire(TraceHitTarget);
+	MulticastFire(SocketLocation,TraceHitTarget);
 }
 
-void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& SocketLocation,const FVector_NetQuantize& TraceHitTarget)
 {
 	if (nullptr == EquippedWeapon)
 	{
@@ -106,7 +111,7 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 	if (Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(TraceHitTarget);
+		EquippedWeapon->Fire(SocketLocation,TraceHitTarget);
 	}
 }
 
@@ -160,13 +165,6 @@ void UCombatComponent::OnRep_CarriedAmmo()
 	{
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
 	}
-}
-
-void UCombatComponent::InitializeCarriedAmmo()
-{
-	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingARAmmo);
-	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingRocketAmmo);
-	CarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, StartingPistolAmmo);
 }
 
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
@@ -524,4 +522,12 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 	}
+}
+
+void UCombatComponent::InitializeCarriedAmmo()
+{
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingARAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingRocketAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, StartingPistolAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_SubmachineGun, StartingSMGAmmo);
 }
