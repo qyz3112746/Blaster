@@ -17,7 +17,7 @@ public:
 	virtual void Fire(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& HitTarget) override;
 
 protected:
-	void OnceTracing(const FVector_NetQuantize& SocketLocation, const FVector& End,AController* InstigatorController);
+	void WeaponTraceHit(const FVector_NetQuantize& SocketLocation, const FVector& HitTarget, FHitResult& OutHit);
 	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget);
 
 	UPROPERTY(EditAnywhere)
