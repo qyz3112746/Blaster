@@ -7,6 +7,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "DrawDebugHelpers.h"
+#include "WeaponTypes.h"
 
 void AHitScanWeapon::Fire(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& HitTarget)
 {
@@ -19,99 +22,119 @@ void AHitScanWeapon::Fire(const FVector_NetQuantize& SocketLocation, const FVect
 	}
 	AController* InstigatorController = OwnerPawn->GetController();
 
-	const auto MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
-	if (MuzzleFlashSocket)
+	FVector End = SocketLocation + (HitTarget - SocketLocation) * 1.25f;
+	OnceTracing(SocketLocation, End, InstigatorController);
+
+}
+
+void AHitScanWeapon::OnceTracing(const FVector_NetQuantize& SocketLocation, const FVector& End, AController* InstigatorController)
+{
+	FHitResult FireHit;
+	UWorld* World = GetWorld();
+
+	if (World)
 	{
-		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
-		FVector End = SocketLocation + (HitTarget - SocketLocation) * 1.25f;
+		World->LineTraceSingleByChannel(
+			FireHit,
+			SocketLocation,
+			End,
+			ECollisionChannel::ECC_Visibility
+		);
 
-		FHitResult FireHit;
-		UWorld* World = GetWorld();
-		if (World)
+		FVector BeamEnd = End;
+		if (FireHit.bBlockingHit)
 		{
-			World->LineTraceSingleByChannel(
-				FireHit,
-				SocketLocation,
-				End, 
-				ECollisionChannel::ECC_Visibility
-			);
-			FVector BeamEnd = End;
-			if (FireHit.bBlockingHit)
-			{
-				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
+			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
 
-				if (BlasterCharacter){
-					if (HasAuthority() && InstigatorController)
-					{
-						UGameplayStatics::ApplyDamage(
-							BlasterCharacter,
-							Damage,
-							InstigatorController,
-							this,
-							UDamageType::StaticClass()
-						);
-					}
-					if (HitSound)
-					{
-						UGameplayStatics::PlaySoundAtLocation(
-							this,
-							HitSound,
-							FireHit.ImpactPoint
-						);
-					}
-				}
-				else
+			if (BlasterCharacter) {
+				if (HasAuthority() && InstigatorController)
 				{
-					if (ImpactSound)
-					{
-						UGameplayStatics::PlaySoundAtLocation(
-							this,
-							ImpactSound,
-							FireHit.ImpactPoint
-						);
-					}
-				}
-
-				if (ImpactParticles)
-				{
-					UGameplayStatics::SpawnEmitterAtLocation(
-						World,
-						ImpactParticles,
-						FireHit.ImpactPoint,
-						FireHit.ImpactNormal.Rotation() 
+					UGameplayStatics::ApplyDamage(
+						BlasterCharacter,
+						Damage,
+						InstigatorController,
+						this,
+						UDamageType::StaticClass()
 					);
 				}
-				BeamEnd = FireHit.ImpactPoint;
-			}
-			if (BeamParticles)
-			{
-				UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
-					World,
-					BeamParticles,
-					SocketLocation
-				);
-				if (Beam)
+				if (HitSound)
 				{
-					Beam->SetVectorParameter(FName("Target"), BeamEnd);
+					UGameplayStatics::PlaySoundAtLocation(
+						this,
+						HitSound,
+						FireHit.ImpactPoint
+					);
 				}
 			}
-
-			if (MuzzleFlash)
+			else
+			{
+				if (ImpactSound)
+				{
+					UGameplayStatics::PlaySoundAtLocation(
+						this,
+						ImpactSound,
+						FireHit.ImpactPoint
+					);
+				}
+			}
+			if (ImpactParticles)
 			{
 				UGameplayStatics::SpawnEmitterAtLocation(
 					World,
-					MuzzleFlash,
-					SocketLocation
+					ImpactParticles,
+					FireHit.ImpactPoint,
+					FireHit.ImpactNormal.Rotation()
 				);
 			}
-			if (FireSound)
+			BeamEnd = FireHit.ImpactPoint;
+		}
+		if (BeamParticles)
+		{
+			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(
+				World,
+				BeamParticles,
+				SocketLocation
+			);
+			if (Beam)
 			{
-				UGameplayStatics::PlaySoundAtLocation(
-					this,
-					FireSound,
-					SocketLocation
-				);
+				Beam->SetVectorParameter(FName("Target"), BeamEnd);
 			}
 		}
+		if (MuzzleFlash)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(
+				World,
+				MuzzleFlash,
+				SocketLocation
+			);
+		}
+		if (FireSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				this,
+				FireSound,
+				SocketLocation
+			);
+		}
 	}
+}
+
+FVector AHitScanWeapon::TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget)
+{
+	FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
+	FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
+	FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
+	FVector EndLoc = SphereCenter + RandVec;
+	FVector ToEndLoc = EndLoc - TraceStart;
+
+	DrawDebugSphere(GetWorld(), SphereCenter, SphereRadius, 12, FColor::Red, true);
+	DrawDebugSphere(GetWorld(), EndLoc, 4.f, 12, FColor::Green, true);
+	DrawDebugLine(GetWorld(),
+		TraceStart,
+		FVector(TraceStart + ToEndLoc * TRACE_LENGTH / ToEndLoc.Size()),
+		FColor::Cyan,
+		true
+	);
+
+	return FVector(TraceStart + ToEndLoc * TRACE_LENGTH / ToEndLoc.Size());
 }
