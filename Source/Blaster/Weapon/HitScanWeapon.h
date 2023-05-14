@@ -15,7 +15,10 @@ class BLASTER_API AHitScanWeapon : public AWeapon
 	GENERATED_BODY()
 public:
 	virtual void Fire(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& HitTarget) override;
-private:
+
+protected:
+	void OnceTracing(const FVector_NetQuantize& SocketLocation, const FVector& End,AController* InstigatorController);
+	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget);
 
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
@@ -37,4 +40,18 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	USoundCue* ImpactSound;
+
+	/**
+	* Trace end with Scatter
+	*/
+	UPROPERTY(EditAnywhere,Category = "Weapon Scatter")
+	float DistanceToSphere = 800.f;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float SphereRadius = 75.f;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	bool bUseScatter = false;
+private:
+
 };
