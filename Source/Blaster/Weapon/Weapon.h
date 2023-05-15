@@ -33,6 +33,12 @@ public:
 	void Dropped();
 	void SetWeaponState(EWeaponState State);
 	void AddAmmo(int32 AmmoToAdd);
+
+	/**
+	* Enable or Disable Custom Depth
+	*/
+	void EnableCustomDepth(bool bEnable);
+
 protected:
 	virtual void BeginPlay() override;
 
