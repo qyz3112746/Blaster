@@ -101,6 +101,9 @@ void AHitScanWeapon::WeaponTraceHit(const FVector_NetQuantize& SocketLocation, c
 			End,
 			ECollisionChannel::ECC_Visibility
 		);
+
+
+
 		FVector BeamEnd = End;
 		if (OutHit.bBlockingHit)
 		{

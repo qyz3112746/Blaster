@@ -27,6 +27,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
 	void FireButtonPressed(bool bPressed);
+
+	UFUNCTION(BlueprintCallable)
+	void ShotgunShellReload();
+
+	void JumpToShotgunEnd();
 protected:
 	virtual void BeginPlay() override;
 	void SetAiming(bool bIsAiming);
@@ -141,6 +146,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	int32 StartingSRAmmo = 15;
 
+	UPROPERTY(EditAnywhere)
+	int32 StartingGrenadeLauncherAmmo = 4;
+
 	void InitializeCarriedAmmo();
 
 	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
@@ -152,6 +160,8 @@ private:
 	int32 AmountToReload();
 
 	void UpdateAmmoValues();
+
+	void UpdateShotgunAmmoValues();
 
 public:	
 	
