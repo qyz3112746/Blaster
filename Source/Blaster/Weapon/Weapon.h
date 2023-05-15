@@ -177,4 +177,5 @@ public:
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 
 	bool IsEmpty();
+	bool IsFull();
 };

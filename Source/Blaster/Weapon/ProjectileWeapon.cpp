@@ -36,7 +36,7 @@ void AProjectileWeapon::ServerSpawnProjectile(const FVector_NetQuantize& SocketL
 				SocketLocation,
 				TargetRotation,
 				SpawnParams
-				);
+			);
 		}
 	}
 }
