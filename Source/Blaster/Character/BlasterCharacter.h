@@ -182,6 +182,12 @@ private:
 	UPROPERTY()
 	class ABlasterPlayerState* BlasterPlayerState;
 
+	/**
+	* Grenade
+	*/
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* AttachedGrenade;
+
 private:
 	UFUNCTION()
 	void OnRep_OverLappingWeapon(AWeapon* LastWeapon);
