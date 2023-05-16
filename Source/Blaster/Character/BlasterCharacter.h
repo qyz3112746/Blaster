@@ -220,4 +220,5 @@ public:
 	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
 
 	FORCEINLINE UAnimMontage* GetReloadMontage() { return ReloadMontage; }
+	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
 };
