@@ -376,6 +376,9 @@ void ABlasterPlayerController::HandleColldown()
 		bool bHUDVaild = BlasterHUD->Announcement && 
 			BlasterHUD->Announcement->InfoText && 
 			BlasterHUD->Announcement->AnnouncementText;
+
+
+
 		if (bHUDVaild)
 		{
 			BlasterHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
