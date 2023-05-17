@@ -37,6 +37,19 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UCombatComponent, Grenades);
 }
 
+void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount)
+{
+	if (CarriedAmmoMap.Contains(WeaponType) && MaxCarriedAmmoMap.Contains(WeaponType))
+	{
+		CarriedAmmoMap[WeaponType] = FMath::Clamp(CarriedAmmoMap[WeaponType] + AmmoAmount,0, MaxCarriedAmmoMap[WeaponType]);
+		UpdateCarriedAmmo();
+	}
+	if (EquippedWeapon && EquippedWeapon->IsEmpty() && EquippedWeapon->GetWeaponType() == WeaponType)
+	{
+		Reload();
+	}
+}
+
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -52,6 +65,7 @@ void UCombatComponent::BeginPlay()
 		if (Character->HasAuthority())
 		{
 			InitializeCarriedAmmo();
+			InitializeMaxCarriedAmmo();
 		}
 	}
 }
@@ -761,4 +775,15 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingShotgunAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, StartingSRAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLaunch, StartingGrenadeLauncherAmmo);
+}
+
+void UCombatComponent::InitializeMaxCarriedAmmo()
+{
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, MaxCarriedARAmmo);
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, MaxRocketAmmo);
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, MaxPistolAmmo);
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_SubmachineGun, MaxSMGAmmo);
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, MaxShotgunAmmo);
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, MaxSRAmmo);
+	MaxCarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLaunch, MaxGrenadeLauncherAmmo);
 }
