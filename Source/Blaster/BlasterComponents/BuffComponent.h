@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Blaster/BlasterTypes/BuffTypes.h"
+
 #include "BuffComponent.generated.h"
 
 
@@ -17,6 +19,8 @@ public:
 	friend class ABlasterCharacter;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void Heal(float HealAmount, float HealingTime);
+	void BuffSpeed(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime, ESpeedBuff BuffType);
+	void SetInitialSpeeds(float BaseSpeed, float CrouchSpeed);
 
 protected:
 	virtual void BeginPlay() override;
@@ -30,8 +34,21 @@ public:
 private:
 	UPROPERTY()
 	class ABlasterCharacter* Character;
-		
+	/**
+	* Heal Buff
+	*/
 	bool bHealing = false;
 	float HealingRate = 0;
 	float AmountToHeal = 0.f;
+
+	/**
+	* Speed Buff
+	*/
+	FTimerHandle SpeedBuffTimer;
+	void SpeedBuffFinished();
+	float InitialBaseSpeed = 0.f;
+	float InitialCrouchSpeed = 0.f;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastSpeedBuff(float BaseSpeed, float CrouchSpeed);
 };
