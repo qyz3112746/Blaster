@@ -39,6 +39,7 @@ public:
 
 	void UpdateHUDHealth();
 	void UpdateHUDShield();
+	void UpdateHUDGrenade();
 	void UpdateHUDAmmo();
 	void SpawnDefaultWeapon();
 protected:
@@ -146,7 +147,7 @@ private:
 	float MaxShield = 100.f;
 
 	UPROPERTY(ReplicatedUsing = OnRep_Shield, Category = "Player Stats", VisibleAnywhere)
-	float Shield = 100.f;
+	float Shield = 0.f;
 
 	UFUNCTION()
 	void OnRep_Shield(float LastShield);
@@ -214,11 +215,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AWeapon> DefaultWeaponClass;
 
-	FTimerHandle InitialAmmoTimer;
-	float InitialAmmoTime = 0.25f;
+	FTimerHandle InitialHUDTimer;
+	float InitialHUDTime = 0.25f;
 
-	void StartInitialAmmoTimer();
-	void InitialAmmoTimerFinished();
+	void StartInitialHUDTimer();
+	void InitialHUDTimerFinished();
 
 private:
 	UFUNCTION()
