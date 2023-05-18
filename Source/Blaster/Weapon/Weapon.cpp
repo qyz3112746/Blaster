@@ -256,6 +256,11 @@ void AWeapon::Fire(const FVector_NetQuantize& SocketLocation, const FVector_NetQ
 
 void AWeapon::Dropped()
 {
+	if (bDestroyWeapon)
+	{
+		Destroy();
+	}
+
 	SetWeaponState(EWeaponState::EWS_Dropped);
 	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
 	WeaponMesh->DetachFromComponent(DetachRules);

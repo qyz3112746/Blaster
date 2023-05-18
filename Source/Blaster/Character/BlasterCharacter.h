@@ -39,6 +39,8 @@ public:
 
 	void UpdateHUDHealth();
 	void UpdateHUDShield();
+	void UpdateHUDAmmo();
+	void SpawnDefaultWeapon();
 protected:
 	virtual void BeginPlay() override;
 	virtual void Jump() override;
@@ -204,6 +206,18 @@ private:
 	*/
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* AttachedGrenade;
+
+	/**
+	* Default weapon
+	*/
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AWeapon> DefaultWeaponClass;
+
+	FTimerHandle InitialAmmoTimer;
+	float InitialAmmoTime = 0.25f;
+
+	void StartInitialAmmoTimer();
+	void InitialAmmoTimerFinished();
 
 private:
 	UFUNCTION()

@@ -103,7 +103,6 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
 		bInitializeHealth = true;
 		HUDHealth = Health;
 		HUDMaxHealth = MaxHealth;
@@ -127,7 +126,6 @@ void ABlasterPlayerController::SetHUDShield(float Shield, float MaxShield)
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
 		bInitializeShield = true;
 		HUDShield = Shield;
 		HUDMaxShield = MaxShield;
@@ -147,7 +145,6 @@ void ABlasterPlayerController::SetHUDScore(float Score)
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
 		bInitializeScore = true;
 		HUDScore = Score;
 	}
@@ -166,7 +163,6 @@ void ABlasterPlayerController::SetHUDDefeats(int32 Defeats)
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
 		bInitializeDefeats = true;
 		HUDDefeats = Defeats;
 	}
@@ -185,6 +181,11 @@ void ABlasterPlayerController::SetHUDWeaponAmmo(int32 Ammo)
 		FSlateColor TextColor = Ammo == 0 ? FSlateColor(FLinearColor::Red) : FSlateColor(FLinearColor::White);
 		BlasterHUD->CharacterOverlay->WeaponAmmoAmount->SetColorAndOpacity(TextColor);
 	}
+	else
+	{
+		bInitializeWeaponAmmo = true;
+		HUDWeaponAmmo = Ammo;
+	}
 }
 
 void ABlasterPlayerController::SetHUDCarriedAmmo(int32 Ammo)
@@ -197,6 +198,11 @@ void ABlasterPlayerController::SetHUDCarriedAmmo(int32 Ammo)
 	{
 		FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
 		BlasterHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(AmmoText));
+	}
+	else
+	{
+		bInitializeCarriedAmmo = true;
+		HUDCarriedAmmo = Ammo;
 	}
 }
 
@@ -257,9 +263,7 @@ void ABlasterPlayerController::SetHUDGrenades(int32 Grenades)
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
 		bInitializeGrenades = true;
-		// HUDGrenades = Grenades;
 	}
 }
 
@@ -328,18 +332,14 @@ void ABlasterPlayerController::PollInit()
 				if (bInitializeShield) SetHUDShield(HUDShield, HUDMaxShield);
 				if (bInitializeScore) SetHUDScore(HUDScore);
 				if (bInitializeDefeats) SetHUDDefeats(HUDDefeats);
-				if (bInitializeGrenades) {
-					ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
-					if (BlasterCharacter && BlasterCharacter->GetCombatComponent())
-					{
-						SetHUDGrenades(BlasterCharacter->GetCombatComponent()->GetGrenades());
-					}
+				if (bInitializeDefeats) SetHUDDefeats(HUDDefeats);
+				if (bInitializeWeaponAmmo) SetHUDWeaponAmmo(HUDWeaponAmmo);
+				if (bInitializeCarriedAmmo)	SetHUDCarriedAmmo(HUDCarriedAmmo);
+				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
+				if (BlasterCharacter && BlasterCharacter->GetCombatComponent())
+				{
+					if (bInitializeGrenades) SetHUDGrenades(BlasterCharacter->GetCombatComponent()->GetGrenades());
 				}
-				bInitializeHealth = false;
-				bInitializeShield = false;
-				bInitializeScore = false;
-				bInitializeDefeats = false;
-				bInitializeGrenades = false;
 			}
 		}
 	}

@@ -69,7 +69,6 @@ ABlasterCharacter::ABlasterCharacter()
 	AttachedGrenade = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Attached Grenade"));
 	AttachedGrenade->SetupAttachment(GetMesh(), FName("GrenadeSocket"));
 	AttachedGrenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
 }
 
 
@@ -205,7 +204,8 @@ void ABlasterCharacter::Destroyed()
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	SpawnDefaultWeapon();
+	StartInitialAmmoTimer();
 	UpdateHUDHealth();
 	UpdateHUDShield();
 
@@ -784,6 +784,31 @@ void ABlasterCharacter::UpdateHUDShield()
 	}
 }
 
+void ABlasterCharacter::UpdateHUDAmmo()
+{
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if (BlasterPlayerController && Combat && Combat->EquippedWeapon)
+	{
+		BlasterPlayerController->SetHUDWeaponAmmo(Combat->EquippedWeapon->GetAmmo());
+		BlasterPlayerController->SetHUDCarriedAmmo(Combat->CarriedAmmo);
+	}
+}
+
+void ABlasterCharacter::SpawnDefaultWeapon()
+{
+	ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
+	UWorld* World = GetWorld();
+	if (BlasterGameMode && World && !bElimmed && DefaultWeaponClass)
+	{
+		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
+		StartingWeapon->bDestroyWeapon = true;
+		if (Combat)
+		{
+			Combat->EquipWeapon(StartingWeapon);
+		}
+	}
+}
+
 bool ABlasterCharacter::IsWeaponEquipped()
 {
 	return (Combat && Combat->EquippedWeapon);
@@ -836,6 +861,21 @@ FVector ABlasterCharacter::GetHitTarget() const
 		return FVector();
 	}
 	return Combat->HitTarget;
+}
+
+void ABlasterCharacter::StartInitialAmmoTimer()
+{
+	GetWorldTimerManager().SetTimer(
+		InitialAmmoTimer,
+		this,
+		&ABlasterCharacter::InitialAmmoTimerFinished,
+		InitialAmmoTime
+	);
+}
+
+void ABlasterCharacter::InitialAmmoTimerFinished()
+{
+	UpdateHUDAmmo();
 }
 
 ECombatState ABlasterCharacter::GetCombatState() const
