@@ -85,6 +85,10 @@ void ABlasterCharacter::Elim()
 	{
 		Combat->EquippedWeapon->Dropped();
 	}
+	if (Combat && Combat->SecondaryWeapon)
+	{
+		Combat->SecondaryWeapon->Dropped();
+	}
 	MulticastElim();
 	GetWorldTimerManager().SetTimer(
 		ElimTimer,
@@ -205,9 +209,8 @@ void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	SpawnDefaultWeapon();
-	StartInitialAmmoTimer();
-	UpdateHUDHealth();
-	UpdateHUDShield();
+	StartInitialHUDTimer();
+
 
 	if (HasAuthority())
 	{
@@ -799,6 +802,15 @@ void ABlasterCharacter::UpdateHUDShield()
 	}
 }
 
+void ABlasterCharacter::UpdateHUDGrenade()
+{
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if (BlasterPlayerController && Combat)
+	{
+		BlasterPlayerController->SetHUDGrenades(Combat->GetGrenades());
+	}
+}
+
 void ABlasterCharacter::UpdateHUDAmmo()
 {
 	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
@@ -878,19 +890,22 @@ FVector ABlasterCharacter::GetHitTarget() const
 	return Combat->HitTarget;
 }
 
-void ABlasterCharacter::StartInitialAmmoTimer()
+void ABlasterCharacter::StartInitialHUDTimer()
 {
 	GetWorldTimerManager().SetTimer(
-		InitialAmmoTimer,
+		InitialHUDTimer,
 		this,
-		&ABlasterCharacter::InitialAmmoTimerFinished,
-		InitialAmmoTime
+		&ABlasterCharacter::InitialHUDTimerFinished,
+		InitialHUDTime
 	);
 }
 
-void ABlasterCharacter::InitialAmmoTimerFinished()
+void ABlasterCharacter::InitialHUDTimerFinished()
 {
+	UpdateHUDHealth();
+	UpdateHUDShield();
 	UpdateHUDAmmo();
+	UpdateHUDGrenade();
 }
 
 ECombatState ABlasterCharacter::GetCombatState() const

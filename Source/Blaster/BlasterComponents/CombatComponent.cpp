@@ -688,13 +688,16 @@ void UCombatComponent::OnRep_EquippedWeapon()
 	}
 }
 
-void UCombatComponent::OnRep_SecondaryWeapon()
+void UCombatComponent::OnRep_SecondaryWeapon(AWeapon* LastWeapon)
 {
 	if (SecondaryWeapon && Character)
 	{
 		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 		AttachActorToBackpack(SecondaryWeapon);
-		PlayEquippedWeaponSound(SecondaryWeapon);
+		if (LastWeapon != EquippedWeapon) 
+		{
+			PlayEquippedWeaponSound(SecondaryWeapon);
+		}
 	}
 }
 
