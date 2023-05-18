@@ -22,6 +22,7 @@ void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	HealRampUp(DeltaTime);
+	ShieldAdding(DeltaTime);
 }
 
 void UBuffComponent::Heal(float HealAmount, float HealingTime)
@@ -37,6 +38,23 @@ void UBuffComponent::Heal(float HealAmount, float HealingTime)
 		TimerHandle, 
 		FTimerDelegate::CreateUObject(this, &UBuffComponent::HealingTimerFinished, Rate),
 		HealingTime,
+		false
+	);
+}
+
+void UBuffComponent::Shield(float ShieldAmount, float BuffTime)
+{
+	bShieldBuff = true;
+	float Rate = ShieldAmount / BuffTime;
+	ShieldAddingRate += Rate;
+	AmountToAddShield += ShieldAmount;
+
+	FTimerHandle TimerHandle;
+
+	GetWorld()->GetTimerManager().SetTimer(
+		TimerHandle,
+		FTimerDelegate::CreateUObject(this, &UBuffComponent::ShieldBuffTimerFinished, Rate),
+		BuffTime,
 		false
 	);
 }
@@ -148,15 +166,39 @@ void UBuffComponent::HealRampUp(float DeltaTime)
 	Character->UpdateHUDHealth();
 	AmountToHeal -= HealThisFrame;
 
-	if (AmountToHeal <= 0.f || Character->GetHealth() >= Character->GetMaxHealth())
+	if (AmountToHeal <= 0.f)
 	{
 		bHealing = false;
-		AmountToHeal = 0;
+		AmountToHeal = 0.f;
+	}
+}
+
+void UBuffComponent::ShieldAdding(float DeltaTime)
+{
+	if (!bShieldBuff || Character == nullptr || Character->IsElimmed())
+	{
+		return;
+	}
+
+	const float AddingThisFrame = FMath::Min(ShieldAddingRate * DeltaTime, AmountToAddShield);
+	Character->SetShield(FMath::Clamp(Character->GetShield() + AddingThisFrame, 0.f, Character->GetMaxShield()));
+	Character->UpdateHUDShield();
+	AmountToAddShield -= AddingThisFrame;
+
+	if (AmountToAddShield <= 0.f)
+	{
+		bShieldBuff = false;
+		AmountToAddShield = 0.f;
 	}
 }
 
 void UBuffComponent::HealingTimerFinished(float Rate)
 {
-	HealingRate -= Rate;
+	HealingRate = HealingRate - Rate;
+}
+
+void UBuffComponent::ShieldBuffTimerFinished(float Rate)
+{
+	ShieldAddingRate = ShieldAddingRate - Rate;
 }
 
