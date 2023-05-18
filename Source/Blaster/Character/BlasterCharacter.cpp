@@ -285,6 +285,8 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ABlasterCharacter::ReloadButtonPressed);
 
 	PlayerInputComponent->BindAction("ThrowGrenade", IE_Pressed, this, &ABlasterCharacter::GrenadeButtonPressed);
+
+	PlayerInputComponent->BindAction("SwapWeapons", IE_Pressed, this, &ABlasterCharacter::SwapWeaponsButtonPressed);
 }
 
 void ABlasterCharacter::PostInitializeComponents()
@@ -406,6 +408,26 @@ void ABlasterCharacter::GrenadeButtonPressed()
 	}
 }
 
+void ABlasterCharacter::SwapWeaponsButtonPressed()
+{
+	if (bDisableGameplay)
+	{
+		return;
+	}
+	ServerSwapWeaponsButtonPressed();
+}
+
+void ABlasterCharacter::ServerSwapWeaponsButtonPressed_Implementation()
+{
+	if (Combat)
+	{
+		if (Combat->ShouldSwapWeapon())
+		{
+			Combat->SwapWeapons();
+		}
+	}
+}
+
 void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
 	if (bElimmed)
@@ -508,14 +530,7 @@ void ABlasterCharacter::EquipButtonPressed()
 	}
 	if (Combat)
 	{
-		if (HasAuthority())
-		{
-			Combat->EquipWeapon(OverlappingWeapon);
-		}
-		else
-		{
-			ServerEquipButtonPressed();
-		}
+		ServerEquipButtonPressed();
 	}
 }
 
