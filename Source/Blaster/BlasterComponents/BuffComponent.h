@@ -19,6 +19,7 @@ public:
 	friend class ABlasterCharacter;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void Heal(float HealAmount, float HealingTime);
+	void Shield(float ShieldAmount, float BuffTime);
 	void BuffSpeed(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime, ESpeedBuff BuffType);
 	void BuffJump(float BuffJumpVelocity, float BuffTime);
 	void SetInitialSpeeds(float BaseSpeed, float CrouchSpeed);
@@ -27,9 +28,10 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	void HealRampUp(float DeltaTime);
+	void ShieldAdding(float DeltaTime);
 
-	UFUNCTION()
 	void HealingTimerFinished(float Rate);
+	void ShieldBuffTimerFinished(float Rate);
 
 public:	
 
@@ -40,8 +42,15 @@ private:
 	* Heal Buff
 	*/
 	bool bHealing = false;
-	float HealingRate = 0;
+	float HealingRate = 0.f;
 	float AmountToHeal = 0.f;
+
+	/**
+	* Shield Buff
+	*/
+	bool bShieldBuff = false;
+	float ShieldAddingRate = 0.f;
+	float AmountToAddShield = 0.f;
 
 	/**
 	* Speed Buff
