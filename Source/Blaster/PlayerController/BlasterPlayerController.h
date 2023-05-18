@@ -86,7 +86,11 @@ private:
 	UPROPERTY()
 	class UCharacterOverlay* CharacterOverlay;
 	bool bInitializeCharacterOverlay = false;
-
+	bool bInitializeHealth = false;
+	bool bInitializeShield = false;
+	bool bInitializeScore = false;
+	bool bInitializeDefeats = false;
+	bool bInitializeGrenades = false;
 	float HUDHealth;
 	float HUDMaxHealth;
 	float HUDShield;
