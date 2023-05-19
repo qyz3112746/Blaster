@@ -37,6 +37,7 @@ protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
 	void PollInit();
+	void CheckPing(float DeltaTime);
 	/**
 	* Sync time between client and server
 	*/
@@ -64,6 +65,10 @@ protected:
 	// Report the current server time to the client in response to ServerRequestServerTime
 	UFUNCTION(Client, Reliable)
 	void ClientJoinMidgame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);
+
+	void HighPingWarning();
+	void StopHighPingWarning();
+
 private:
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
@@ -100,4 +105,15 @@ private:
 	int32 HUDCarriedAmmo;
 	int32 HUDWeaponAmmo;
 	int32 HUDDefeats;
+
+
+	float HighPingRunningTime = 0.f;
+	UPROPERTY(EditAnywhere)
+	float HighPingDuration = 5.f;
+	UPROPERTY(EditAnywhere)
+	float PingAnimationRunningTime = 0.f;
+	UPROPERTY(EditAnywhere)
+	float CheckPingFrequency = 20.f;
+	UPROPERTY(EditAnywhere)
+	float HighPingThreshold = 50.f;
 };
