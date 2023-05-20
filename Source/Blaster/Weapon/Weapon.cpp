@@ -277,7 +277,10 @@ void AWeapon::Fire(const FVector_NetQuantize& SocketLocation, const FVector_NetQ
 			}
 		}
 	}
-	SpendRound();
+	if (HasAuthority())
+	{
+		SpendRound();
+	}
 }
 
 void AWeapon::Dropped()

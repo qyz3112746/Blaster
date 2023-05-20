@@ -114,10 +114,11 @@ void UCombatComponent::Fire()
 			if (MuzzleFlashSocket)
 			{
 				FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(EquippedWeapon->GetWeaponMesh());
-				ServerFire(SocketTransform.GetLocation(),HitTarget);
-				StartFireTimer();
 				CrosshairShootingFactor += EquippedWeapon->GetCrosshairShootingFactor();
 				CrosshairShootingFactor = UKismetMathLibrary::FMin(EquippedWeapon->GetCrosshairShootingMaxFactor(), CrosshairShootingFactor);
+				ServerFire(SocketTransform.GetLocation(), HitTarget);
+				LocalFire(SocketTransform.GetLocation(), HitTarget);
+				StartFireTimer();
 			}
 		}
 	}
@@ -129,6 +130,15 @@ void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& Sock
 }
 
 void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& SocketLocation,const FVector_NetQuantize& TraceHitTarget)
+{
+	if (Character && Character->IsLocallyControlled())
+	{
+		return;
+	}
+	LocalFire(SocketLocation, TraceHitTarget);
+}
+
+void UCombatComponent::LocalFire(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& TraceHitTarget)
 {
 	if (nullptr == EquippedWeapon)
 	{
@@ -144,7 +154,7 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& S
 	if (Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(SocketLocation,TraceHitTarget);
+		EquippedWeapon->Fire(SocketLocation, TraceHitTarget);
 	}
 }
 
@@ -293,6 +303,11 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 void UCombatComponent::SwapWeapons()
 {
+	if (CombatState != ECombatState::ECS_Unoccupied)
+	{
+		return;
+	}
+
 	AWeapon* TempWeapon = EquippedWeapon;
 	EquippedWeapon = SecondaryWeapon;
 	SecondaryWeapon = TempWeapon;
@@ -443,6 +458,16 @@ void UCombatComponent::Reload()
 void UCombatComponent::ServerReload_Implementation()
 {
 	if (Character == nullptr || EquippedWeapon == nullptr)
+	{
+		return;
+	}
+
+	if (CarriedAmmo == 0 || EquippedWeapon->IsFull())
+	{
+		return;
+	}
+
+	if (CombatState != ECombatState::ECS_Unoccupied)
 	{
 		return;
 	}
@@ -810,7 +835,7 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 		return;
 	}
 
-	bAiming = bIsAiming;
+	//bAiming = bIsAiming;
 	ServerSetAiming(bIsAiming);
 	if (Character)
 	{
