@@ -59,6 +59,10 @@ protected:
 	void OnRep_SecondaryWeapon(AWeapon* LastWeapon);
 
 	void Fire();
+	void FireProjectileWeapon();
+	void FireHitScanWeapon();
+	void FireShotgun();
+
 	void LocalFire(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& TraceHitTarget);
 
 	UFUNCTION(Server, Reliable)

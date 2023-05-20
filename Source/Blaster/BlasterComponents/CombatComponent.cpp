@@ -110,18 +110,48 @@ void UCombatComponent::Fire()
 	{
 		if (EquippedWeapon)
 		{
-			const auto MuzzleFlashSocket = EquippedWeapon->GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
-			if (MuzzleFlashSocket)
+			switch (EquippedWeapon->FireType)
 			{
-				FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(EquippedWeapon->GetWeaponMesh());
-				CrosshairShootingFactor += EquippedWeapon->GetCrosshairShootingFactor();
-				CrosshairShootingFactor = UKismetMathLibrary::FMin(EquippedWeapon->GetCrosshairShootingMaxFactor(), CrosshairShootingFactor);
-				ServerFire(SocketTransform.GetLocation(), HitTarget);
-				LocalFire(SocketTransform.GetLocation(), HitTarget);
-				StartFireTimer();
+			case EFireType::EFT_Projectile:
+				FireProjectileWeapon();
+				break;
+			case EFireType::EFT_HitScan:
+				FireHitScanWeapon();
+				break;
+			case EFireType::EFT_Shotgun:
+				FireShotgun();
+				break;
 			}
+			CrosshairShootingFactor += EquippedWeapon->GetCrosshairShootingFactor();
+			CrosshairShootingFactor = UKismetMathLibrary::FMin(EquippedWeapon->GetCrosshairShootingMaxFactor(), CrosshairShootingFactor);
+			StartFireTimer();
 		}
 	}
+}
+
+void UCombatComponent::FireProjectileWeapon()
+{
+	const auto MuzzleFlashSocket = EquippedWeapon->GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
+	if (MuzzleFlashSocket)
+	{
+		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(EquippedWeapon->GetWeaponMesh());
+		ServerFire(SocketTransform.GetLocation(), HitTarget);
+		LocalFire(SocketTransform.GetLocation(), HitTarget);
+	}
+}
+void UCombatComponent::FireHitScanWeapon()
+{
+	const auto MuzzleFlashSocket = EquippedWeapon->GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
+	if (MuzzleFlashSocket)
+	{
+		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(EquippedWeapon->GetWeaponMesh());
+		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(SocketTransform.GetLocation(), HitTarget) : HitTarget;
+		ServerFire(SocketTransform.GetLocation(), HitTarget);
+		LocalFire(SocketTransform.GetLocation(), HitTarget);
+	}
+}
+void UCombatComponent::FireShotgun()
+{
 }
 
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& SocketLocation,const FVector_NetQuantize& TraceHitTarget)
