@@ -3,6 +3,7 @@
 
 #include "CombatComponent.h"
 #include "Blaster/Weapon/Weapon.h"
+#include "Blaster/Weapon/Shotgun.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Components/SphereComponent.h"
@@ -135,6 +136,7 @@ void UCombatComponent::FireProjectileWeapon()
 	if (MuzzleFlashSocket)
 	{
 		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(EquippedWeapon->GetWeaponMesh());
+		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(SocketTransform.GetLocation(), HitTarget) : HitTarget;
 		ServerFire(SocketTransform.GetLocation(), HitTarget);
 		LocalFire(SocketTransform.GetLocation(), HitTarget);
 	}
@@ -152,6 +154,34 @@ void UCombatComponent::FireHitScanWeapon()
 }
 void UCombatComponent::FireShotgun()
 {
+	const auto MuzzleFlashSocket = EquippedWeapon->GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
+	if (MuzzleFlashSocket == nullptr)
+	{
+		return;
+	}
+	FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(EquippedWeapon->GetWeaponMesh());
+	AShotgun* Shotgun = Cast<AShotgun>(EquippedWeapon);
+	if (Shotgun)
+	{
+		TArray<FVector_NetQuantize> HitTargets;
+		Shotgun->ShotgunTraceEndWithScatter(SocketTransform.GetLocation(), HitTarget, HitTargets);
+		LocalShotgunFire(SocketTransform.GetLocation(), HitTargets);
+		ServerShotgunFire(SocketTransform.GetLocation(), HitTargets);
+	}
+}
+
+void UCombatComponent::ServerShotgunFire_Implementation(const FVector_NetQuantize& SocketLocation, const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	MulticastShotgunFire(SocketLocation, TraceHitTargets);
+}
+
+void UCombatComponent::MulticastShotgunFire_Implementation(const FVector_NetQuantize& SocketLocation, const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	if (Character && Character->IsLocallyControlled())
+	{
+		return;
+	}
+	LocalShotgunFire(SocketLocation, TraceHitTargets);
 }
 
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& SocketLocation,const FVector_NetQuantize& TraceHitTarget)
@@ -174,17 +204,26 @@ void UCombatComponent::LocalFire(const FVector_NetQuantize& SocketLocation, cons
 	{
 		return;
 	}
-	if (Character && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
-	{
-		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(SocketLocation, TraceHitTarget);
-		CombatState = ECombatState::ECS_Unoccupied;
-		return;
-	}
 	if (Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(SocketLocation, TraceHitTarget);
+	}
+}
+
+void UCombatComponent::LocalShotgunFire(const FVector_NetQuantize& SocketLocation, const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	auto Shotgun = Cast<AShotgun>(EquippedWeapon);
+	if (Shotgun == nullptr || Character == nullptr)
+	{
+		return;
+	}
+	if (Character && CombatState == ECombatState::ECS_Reloading || Character && CombatState == ECombatState::ECS_Unoccupied)
+	{
+		Character->PlayFireMontage(bAiming);
+		Shotgun->FireShotgun(SocketLocation, TraceHitTargets);
+		CombatState = ECombatState::ECS_Unoccupied;
+		return;
 	}
 }
 
