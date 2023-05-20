@@ -18,7 +18,6 @@ public:
 
 protected:
 	void WeaponTraceHit(const FVector_NetQuantize& SocketLocation, const FVector& HitTarget, FHitResult& OutHit);
-	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget);
 
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
@@ -41,17 +40,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	USoundCue* ImpactSound;
 
-	/**
-	* Trace end with Scatter
-	*/
-	UPROPERTY(EditAnywhere,Category = "Weapon Scatter")
-	float DistanceToSphere = 800.f;
-
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
-	float SphereRadius = 75.f;
-
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
-	bool bUseScatter = false;
 private:
 
 };
