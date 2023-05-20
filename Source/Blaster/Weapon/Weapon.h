@@ -174,11 +174,18 @@ private:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	bool bAutomatic = true;
 
-	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
+	UPROPERTY(EditAnywhere)
 	int32 Ammo;
 
-	UFUNCTION()
-	void OnRep_Ammo();
+	UFUNCTION(Client,Reliable)
+	void ClientUpdateAmmo(int32 ServerAmmo);
+
+	// The number of unprocessed server requests for Ammo.
+	// Incremented in SpendRound, decremented in ClientUpdateAmmo.
+	int32 Sequence = 0;
+
+	UFUNCTION(Client, Reliable)
+	void ClientAddAmmo(int32 AmmoToAdd);
 
 	void SpendRound();
 
