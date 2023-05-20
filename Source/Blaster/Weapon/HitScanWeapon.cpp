@@ -94,12 +94,17 @@ void AHitScanWeapon::WeaponTraceHit(const FVector_NetQuantize& SocketLocation, c
 	{
 		FVector End = SocketLocation + (HitTarget - SocketLocation) * 1.25f;
 
-		World->LineTraceSingleByChannel(
+		bool bHit = World->LineTraceSingleByChannel(
 			OutHit,
 			SocketLocation,
 			End,
 			ECollisionChannel::ECC_Visibility
 		);
+
+		if (!bHit)
+		{
+			OutHit.ImpactPoint = End;
+		}
 
 		DrawDebugSphere(GetWorld(), OutHit.ImpactPoint, 4.f, 12, FColor::Orange, true);
 
