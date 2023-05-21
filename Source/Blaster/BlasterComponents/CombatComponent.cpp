@@ -132,26 +132,39 @@ void UCombatComponent::Fire()
 
 void UCombatComponent::FireProjectileWeapon()
 {
-	const auto MuzzleFlashSocket = EquippedWeapon->GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
-	if (MuzzleFlashSocket)
+	if (EquippedWeapon && Character)
 	{
-		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(EquippedWeapon->GetWeaponMesh());
-		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(SocketTransform.GetLocation(), HitTarget) : HitTarget;
-		ServerFire(SocketTransform.GetLocation(), HitTarget);
-		LocalFire(SocketTransform.GetLocation(), HitTarget);
+		const auto MuzzleFlashSocket = EquippedWeapon->GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
+		if (MuzzleFlashSocket)
+		{
+			FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(EquippedWeapon->GetWeaponMesh());
+			HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(SocketTransform.GetLocation(), HitTarget) : HitTarget;
+			ServerFire(SocketTransform.GetLocation(), HitTarget);
+			if (!Character->HasAuthority())
+			{
+				LocalFire(SocketTransform.GetLocation(), HitTarget);
+			}
+		}
 	}
 }
 void UCombatComponent::FireHitScanWeapon()
 {
-	const auto MuzzleFlashSocket = EquippedWeapon->GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
-	if (MuzzleFlashSocket)
+	if (EquippedWeapon && Character)
 	{
-		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(EquippedWeapon->GetWeaponMesh());
-		HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(SocketTransform.GetLocation(), HitTarget) : HitTarget;
-		ServerFire(SocketTransform.GetLocation(), HitTarget);
-		LocalFire(SocketTransform.GetLocation(), HitTarget);
+		const auto MuzzleFlashSocket = EquippedWeapon->GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
+		if (MuzzleFlashSocket)
+		{
+			FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(EquippedWeapon->GetWeaponMesh());
+			HitTarget = EquippedWeapon->bUseScatter ? EquippedWeapon->TraceEndWithScatter(SocketTransform.GetLocation(), HitTarget) : HitTarget;
+			ServerFire(SocketTransform.GetLocation(), HitTarget);
+			if (!Character->HasAuthority())
+			{
+				LocalFire(SocketTransform.GetLocation(), HitTarget);
+			}
+		}
 	}
 }
+
 void UCombatComponent::FireShotgun()
 {
 	const auto MuzzleFlashSocket = EquippedWeapon->GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
@@ -161,12 +174,15 @@ void UCombatComponent::FireShotgun()
 	}
 	FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(EquippedWeapon->GetWeaponMesh());
 	AShotgun* Shotgun = Cast<AShotgun>(EquippedWeapon);
-	if (Shotgun)
+	if (Shotgun && Character)
 	{
 		TArray<FVector_NetQuantize> HitTargets;
 		Shotgun->ShotgunTraceEndWithScatter(SocketTransform.GetLocation(), HitTarget, HitTargets);
-		LocalShotgunFire(SocketTransform.GetLocation(), HitTargets);
 		ServerShotgunFire(SocketTransform.GetLocation(), HitTargets);
+		if (!Character->HasAuthority())
+		{
+			LocalShotgunFire(SocketTransform.GetLocation(), HitTargets);
+		}
 	}
 }
 
@@ -177,7 +193,7 @@ void UCombatComponent::ServerShotgunFire_Implementation(const FVector_NetQuantiz
 
 void UCombatComponent::MulticastShotgunFire_Implementation(const FVector_NetQuantize& SocketLocation, const TArray<FVector_NetQuantize>& TraceHitTargets)
 {
-	if (Character && Character->IsLocallyControlled())
+	if (Character && Character->IsLocallyControlled() && !Character->HasAuthority())
 	{
 		return;
 	}
@@ -191,7 +207,7 @@ void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& Sock
 
 void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& SocketLocation,const FVector_NetQuantize& TraceHitTarget)
 {
-	if (Character && Character->IsLocallyControlled())
+	if (Character && Character->IsLocallyControlled() && !Character->HasAuthority())
 	{
 		return;
 	}
@@ -263,6 +279,12 @@ bool UCombatComponent::CanFire()
 	{
 		return false;
 	}
+
+	if (bLocallyReloading)
+	{
+		return false;
+	}
+
 	if(EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
 	{
 		if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading)
@@ -504,23 +526,16 @@ void UCombatComponent::ReloadEmptyWeapon()
 
 void UCombatComponent::Reload()
 {
-	if (CarriedAmmo == 0)
+	if (CarriedAmmo > 0 &&
+		CombatState == ECombatState::ECS_Unoccupied &&
+		!bLocallyReloading &&
+		EquippedWeapon &&
+		!EquippedWeapon->IsFull()
+		)
 	{
-		return;
-	}
-
-	if (CombatState != ECombatState::ECS_Unoccupied)
-	{
-		return;
-	}
-
-	if (EquippedWeapon)
-	{
-		if (EquippedWeapon->IsFull())
-		{
-			return;
-		}
 		ServerReload();
+		HandleReload();
+		bLocallyReloading = true;
 	}
 }
 
@@ -530,19 +545,15 @@ void UCombatComponent::ServerReload_Implementation()
 	{
 		return;
 	}
-
-	if (CarriedAmmo == 0 || EquippedWeapon->IsFull())
+	if (CarriedAmmo <= 0 || CombatState != ECombatState::ECS_Unoccupied || EquippedWeapon->IsFull())
 	{
 		return;
 	}
-
-	if (CombatState != ECombatState::ECS_Unoccupied)
-	{
-		return;
-	}
-
 	CombatState = ECombatState::ECS_Reloading;
-	HandleReload();
+	if (!Character->IsLocallyControlled())
+	{
+		HandleReload();
+	}
 }
 
 void UCombatComponent::OnRep_CombatState()
@@ -550,7 +561,10 @@ void UCombatComponent::OnRep_CombatState()
 	switch (CombatState)
 	{
 	case ECombatState::ECS_Reloading:
-		HandleReload();
+		if (Character && !Character->IsLocallyControlled())
+		{
+			HandleReload();
+		}
 		break;
 	case ECombatState::ECS_Unoccupied:
 		if (bFireButtonPressed) 
@@ -575,6 +589,7 @@ void UCombatComponent::FinishReloading()
 	{
 		return;
 	}
+	bLocallyReloading = false;
 	if (Character->HasAuthority())
 	{
 		CombatState = ECombatState::ECS_Unoccupied;
@@ -588,7 +603,10 @@ void UCombatComponent::FinishReloading()
 
 void UCombatComponent::HandleReload()
 {
-	Character->PlayReloadMontage();
+	if (Character)
+	{
+		Character->PlayReloadMontage();
+	}
 }
 
 void UCombatComponent::ThrowGrenade()
