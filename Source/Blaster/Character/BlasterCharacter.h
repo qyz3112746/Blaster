@@ -126,11 +126,17 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_OverLappingWeapon)
 	class AWeapon* OverlappingWeapon;
 
+	/**
+	* Blaster components
+	*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UCombatComponent* Combat;
 
 	UPROPERTY(VisibleAnywhere)
 	class UBuffComponent* Buff;
+
+	UPROPERTY(VisibleAnywhere)
+	class ULagCompensationComponent* LagCompensation;
 
 	bool bElimmed = false;
 
