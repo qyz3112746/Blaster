@@ -17,9 +17,6 @@ void ULagCompensationComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	FFramePackage Package;
-	SaveFramePackage(Package);
-	ShowFramePackage(Package, FColor::Orange);
 }
 
 void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
@@ -49,7 +46,8 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 			BoxInfo.Value.BoxExtent,
 			FQuat(BoxInfo.Value.Rotation),
 			Color,
-			true
+			false,
+			MaxRecordTime
 		);
 	}
 }
@@ -58,6 +56,19 @@ void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	FFramePackage ThisFrame;
+	SaveFramePackage(ThisFrame);
+	if (FrameHistory.Num() > 1)
+	{
+		float HistoryLength = FrameHistory.GetHead()->GetValue().Time - FrameHistory.GetTail()->GetValue().Time;
+		while (HistoryLength > MaxRecordTime && !FrameHistory.IsEmpty())
+		{
+			FrameHistory.RemoveNode(FrameHistory.GetTail());
+			HistoryLength = FrameHistory.GetHead()->GetValue().Time - FrameHistory.GetTail()->GetValue().Time;
+		}
+	}
+	FrameHistory.AddHead(ThisFrame);
+	ShowFramePackage(ThisFrame, FColor::Red);
 }
 
 
