@@ -308,6 +308,8 @@ public:
 	ECombatState GetCombatState() const;
 	FORCEINLINE UCombatComponent* GetCombatComponent() const { return Combat; }
 	FORCEINLINE UBuffComponent* GetBuffComponent() const { return Buff; }
+	FORCEINLINE ULagCompensationComponent* GetLagCompensationComponent() const { return LagCompensation; }
+
 	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
 
 	FORCEINLINE UAnimMontage* GetReloadMontage() { return ReloadMontage; }
