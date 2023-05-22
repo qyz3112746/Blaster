@@ -4,11 +4,12 @@
 #include "Shotgun.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 #include "Kismet/KismetMathLibrary.h"
-
+#include "Blaster/BlasterComponents/LagCompensationComponent.h"
 
 void AShotgun::FireShotgun(const FVector_NetQuantize& SocketLocation, const TArray<FVector_NetQuantize>& HitTargets)
 {
@@ -74,17 +75,44 @@ void AShotgun::FireShotgun(const FVector_NetQuantize& SocketLocation, const TArr
 			);
 		}
 	}
-	if (InstigatorController && HasAuthority())
+	TArray<ABlasterCharacter*> HitCharacters;
+	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(OwnerPawn) : BlasterOwnerCharacter;
+	BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(InstigatorController) : BlasterOwnerController;
+	if (BlasterOwnerCharacter == nullptr || BlasterOwnerController == nullptr)
 	{
-		for (auto HitPair : HitMap)
+		return;
+	}
+	for (auto HitPair : HitMap)
+	{
+		if (InstigatorController && HitPair.Key)
 		{
-			UGameplayStatics::ApplyDamage(
-				HitPair.Key,
-				Damage * float(HitPair.Value),
-				InstigatorController,
-				this,
-				UDamageType::StaticClass()
-			);
+			if (HasAuthority() && (!bUseServerSideRewind || BlasterOwnerCharacter->IsLocallyControlled()))
+			{
+				UGameplayStatics::ApplyDamage(
+					HitPair.Key,
+					Damage * float(HitPair.Value),
+					InstigatorController,
+					this,
+					UDamageType::StaticClass()
+				);
+			}
+			HitCharacters.Add(HitPair.Key);
+		}
+	}
+	if (bUseServerSideRewind)
+	{
+		if (!HasAuthority())
+		{
+			if (BlasterOwnerCharacter->GetLagCompensationComponent() && 
+				BlasterOwnerCharacter->IsLocallyControlled())
+			{
+				BlasterOwnerCharacter->GetLagCompensationComponent()->ShotgunServerScoreRequest(
+					HitCharacters,
+					SocketLocation,
+					HitTargets,
+					BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime
+				);
+			}
 		}
 	}
 	if (MuzzleFlash)

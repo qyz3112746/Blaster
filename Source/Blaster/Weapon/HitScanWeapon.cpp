@@ -4,11 +4,14 @@
 #include "HitScanWeapon.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
-#include "DrawDebugHelpers.h"
 #include "WeaponTypes.h"
+#include "Blaster/BlasterComponents/LagCompensationComponent.h"
+
+#include "DrawDebugHelpers.h"
 
 void AHitScanWeapon::Fire(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& HitTarget)
 {
@@ -27,17 +30,56 @@ void AHitScanWeapon::Fire(const FVector_NetQuantize& SocketLocation, const FVect
 	WeaponTraceHit(SocketLocation, HitTarget, FireHit);
 
 	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
-	if (BlasterCharacter) 
+	if (BlasterCharacter)
 	{
-		if (HasAuthority() && InstigatorController)
+		if (InstigatorController)
 		{
-			UGameplayStatics::ApplyDamage(
-				BlasterCharacter,
-				Damage,
-				InstigatorController,
-				this,
-				UDamageType::StaticClass()
-			);
+			if (HasAuthority() && !bUseServerSideRewind) // when not use SSR, only the server apply damage
+			{
+				UGameplayStatics::ApplyDamage(
+					BlasterCharacter,
+					Damage,
+					InstigatorController,
+					this,
+					UDamageType::StaticClass()
+				);
+			}
+			if(bUseServerSideRewind) // when use SSR, only the server apply damage
+			{
+				BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(OwnerPawn) : BlasterOwnerCharacter;
+				BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(InstigatorController) : BlasterOwnerController;
+				if (!HasAuthority()) // if the client owner the weapon, send RPC to apply damage
+				{
+					if (BlasterOwnerCharacter && 
+						BlasterOwnerController && 
+						BlasterOwnerCharacter->GetLagCompensationComponent() && 
+						BlasterOwnerCharacter->IsLocallyControlled())
+					{
+						BlasterOwnerCharacter->GetLagCompensationComponent()->ServerScoreRequest(
+							BlasterCharacter,
+							SocketLocation,
+							FireHit.ImpactPoint,
+							BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime,
+							this
+						);
+					}
+				}
+				else // if the server owner the weapon, apply damage
+				{
+					if (BlasterOwnerCharacter && 
+						BlasterOwnerController &&
+						BlasterOwnerCharacter->IsLocallyControlled())
+					{
+						UGameplayStatics::ApplyDamage(
+							BlasterCharacter,
+							Damage,
+							InstigatorController,
+							this,
+							UDamageType::StaticClass()
+						);
+					}
+				}
+			}
 		}
 		if (HitSound)
 		{
