@@ -34,7 +34,7 @@ void AHitScanWeapon::Fire(const FVector_NetQuantize& SocketLocation, const FVect
 	{
 		if (InstigatorController)
 		{
-			if (HasAuthority() && !bUseServerSideRewind)
+			if (HasAuthority() && !bUseServerSideRewind) // when not use SSR, only the server apply damage
 			{
 				UGameplayStatics::ApplyDamage(
 					BlasterCharacter,
@@ -44,19 +44,40 @@ void AHitScanWeapon::Fire(const FVector_NetQuantize& SocketLocation, const FVect
 					UDamageType::StaticClass()
 				);
 			}
-			if(!HasAuthority() && bUseServerSideRewind)
+			if(bUseServerSideRewind) // when use SSR, only the server apply damage
 			{
 				BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(OwnerPawn) : BlasterOwnerCharacter;
 				BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(InstigatorController) : BlasterOwnerController;
-				if (BlasterOwnerCharacter && BlasterOwnerController && BlasterOwnerCharacter->GetLagCompensationComponent())
+				if (!HasAuthority()) // if the client owner the weapon, send RPC to apply damage
 				{
-					BlasterOwnerCharacter->GetLagCompensationComponent()->ServerScoreRequest(
-						BlasterCharacter,
-						SocketLocation,
-						FireHit.ImpactPoint,
-						BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime,
-						this
-					);
+					if (BlasterOwnerCharacter && 
+						BlasterOwnerController && 
+						BlasterOwnerCharacter->GetLagCompensationComponent() && 
+						BlasterOwnerCharacter->IsLocallyControlled())
+					{
+						BlasterOwnerCharacter->GetLagCompensationComponent()->ServerScoreRequest(
+							BlasterCharacter,
+							SocketLocation,
+							FireHit.ImpactPoint,
+							BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime,
+							this
+						);
+					}
+				}
+				else // if the server owner the weapon, apply damage
+				{
+					if (BlasterOwnerCharacter && 
+						BlasterOwnerController &&
+						BlasterOwnerCharacter->IsLocallyControlled())
+					{
+						UGameplayStatics::ApplyDamage(
+							BlasterCharacter,
+							Damage,
+							InstigatorController,
+							this,
+							UDamageType::StaticClass()
+						);
+					}
 				}
 			}
 		}
