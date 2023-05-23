@@ -19,5 +19,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AProjectile> ProjectileClass;
 
-	void ServerSpawnProjectile(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& HitTarget);
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AProjectile> ServerSideRewindProjectileClass;
+
+	void SpawnProjectile(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& HitTarget);
 };
