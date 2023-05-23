@@ -90,8 +90,7 @@ private:
 	void MulticastHitEffect(bool bHitted, const FVector_NetQuantize& HitPoint);
 public:	
 
-protected:
-	UPROPERTY(EditAnywhere)
+public:
 	float Damage = 20.f;
 
 };
