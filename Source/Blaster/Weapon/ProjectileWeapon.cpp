@@ -51,7 +51,7 @@ void AProjectileWeapon::SpawnProjectile(const FVector_NetQuantize& SocketLocatio
 					if (ServerSideRewindProjectileClass)
 					{
 						SpawnedProjectile = World->SpawnActor<AProjectile>(ServerSideRewindProjectileClass, SocketLocation, TargetRotation, SpawnParams);
-						SpawnedProjectile->bUseServerSideRewind = false;
+						SpawnedProjectile->bUseServerSideRewind = true;
 					}
 				}
 			}
