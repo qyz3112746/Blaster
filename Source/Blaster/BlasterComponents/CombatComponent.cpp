@@ -418,14 +418,15 @@ void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 {
 	DropEquippedWeapon();
 	EquippedWeapon = WeaponToEquip;
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-	AttachActorToRightHand(EquippedWeapon);
 	EquippedWeapon->SetOwner(Character);
 	EquippedWeapon->SetHUDAmmo();
+	AttachActorToRightHand(EquippedWeapon);
 	UpdateCarriedAmmo();
 	PlayEquippedWeaponSound(EquippedWeapon);
 	ReloadEmptyWeapon();
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 }
+
 void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 {
 	SecondaryWeapon = WeaponToEquip;
