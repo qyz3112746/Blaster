@@ -16,6 +16,7 @@
 #include "Blaster/GameState/BlasterGameState.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Components/Image.h"
+#include "Blaster/HUD/ReturnToMainMenu.h"
 
 void ABlasterPlayerController::BeginPlay()
 {
@@ -131,6 +132,31 @@ void ABlasterPlayerController::StopHighPingWarning()
 	}
 }
 
+void ABlasterPlayerController::ShowReturnToMainMenu()
+{
+	// TODO show the Return to Main Menu widget
+	if (ReturnToMainMenuWidget == nullptr)
+	{
+		return;
+	}
+	if (ReturnToMainMenu == nullptr)
+	{
+		ReturnToMainMenu = CreateWidget<UReturnToMainMenu>(this, ReturnToMainMenuWidget);
+	}
+	if (ReturnToMainMenu)
+	{
+		bReturnToMainMenuOpen = !bReturnToMainMenuOpen;
+		if (bReturnToMainMenuOpen)
+		{
+			ReturnToMainMenu->MenuSetup();
+		}
+		else
+		{
+			ReturnToMainMenu->MenuTearDown();
+		}
+	}
+}
+
 void ABlasterPlayerController::ServerCheckMatchState_Implementation()
 {
 	ABlasterGameMode* GameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
@@ -162,6 +188,17 @@ void ABlasterPlayerController::ClientJoinMidgame_Implementation(FName StateOfMat
 	{
 		BlasterHUD->AddAnnouncement();
 	}
+}
+
+void ABlasterPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+	if (InputComponent == nullptr)
+	{
+		return;
+	}
+
+	InputComponent->BindAction("Quit", EInputEvent::IE_Pressed, this, &ABlasterPlayerController::ShowReturnToMainMenu);
 }
 
 void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
