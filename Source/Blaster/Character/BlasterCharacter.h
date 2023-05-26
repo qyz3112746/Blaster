@@ -10,6 +10,8 @@
 #include "Blaster/BlasterTypes/CombatState.h"
 #include "BlasterCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
+
 UCLASS()
 class BLASTER_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
@@ -32,9 +34,9 @@ public:
 	void PlaySwapMontage();
 
 	virtual void OnRep_ReplicatedMovement() override;
-	void Elim();
+	void Elim(bool bPlayerLeftGame);
 	UFUNCTION(NetMulticast,Reliable)
-	void MulticastElim();
+	void MulticastElim(bool bPlayerLeftGame);
 	virtual void Destroyed() override;
 
 	UPROPERTY(Replicated)
@@ -95,6 +97,10 @@ public:
 
 	bool bFinishedSwaping = true;
 
+	UFUNCTION(Server, Reliable)
+	void ServerLeaveGame();
+
+	FOnLeftGame OnLeftGame;
 protected:
 	virtual void BeginPlay() override;
 	virtual void Jump() override;
@@ -227,6 +233,7 @@ private:
 
 	void ElimTimerFinished();
 
+	bool bLeftGame = false;
 
 	/**
 	* Dissolve effect
