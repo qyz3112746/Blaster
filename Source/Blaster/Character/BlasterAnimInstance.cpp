@@ -79,11 +79,11 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		}
 	}
 
-	bUseFABRIK = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
-	bool bFARBIKOverride = 
-		BlasterCharacter->IsLocallyControlled() &&
-		BlasterCharacter->GetCombatState() != ECombatState::ECS_ThrowingGrenade &&
-		BlasterCharacter->bFinishedSwaping;
+		bUseFABRIK = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
+		bool bFARBIKOverride = 
+			BlasterCharacter->IsLocallyControlled() &&
+			BlasterCharacter->GetCombatState() != ECombatState::ECS_ThrowingGrenade &&
+			BlasterCharacter->bFinishedSwaping;
 	if (bFARBIKOverride)
 	{
 		bUseFABRIK = !BlasterCharacter->IsLocallyReloading();
