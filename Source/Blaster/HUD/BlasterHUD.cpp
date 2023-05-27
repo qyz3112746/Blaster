@@ -5,6 +5,7 @@
 #include "CharacterOverlay.h"
 #include "GameFramework/PlayerController.h"
 #include "Announcement.h"
+#include "ElimAnnouncement.h"
 
 void ABlasterHUD::DrawHUD()
 {
@@ -53,21 +54,35 @@ void ABlasterHUD::BeginPlay()
 
 void ABlasterHUD::AddCharacterOverlay()
 {
-	APlayerController* PlayerController = GetOwningPlayerController();
-	if (PlayerController && CharacterOverlayClass && CharacterOverlay == nullptr)
+	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
+	if (OwningPlayer && CharacterOverlayClass && CharacterOverlay == nullptr)
 	{
-		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
+		CharacterOverlay = CreateWidget<UCharacterOverlay>(OwningPlayer, CharacterOverlayClass);
 		CharacterOverlay->AddToViewport();
 	}
 }
 
 void ABlasterHUD::AddAnnouncement()
 {
-	APlayerController* PlayerController = GetOwningPlayerController();
-	if (PlayerController && AnnouncementClass && Announcement == nullptr)
+	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
+	if (OwningPlayer && AnnouncementClass && Announcement == nullptr)
 	{
-		Announcement = CreateWidget<UAnnouncement>(PlayerController, AnnouncementClass);
+		Announcement = CreateWidget<UAnnouncement>(OwningPlayer, AnnouncementClass);
 		Announcement->AddToViewport();
+	}
+}
+
+void ABlasterHUD::AddElimAnnouncement(FString Attack, FString Victim)
+{
+	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
+	if (OwningPlayer && ElimAnnouncementClass)
+	{
+		auto ElimAnnouncementWidget = CreateWidget<UElimAnnouncement>(OwningPlayer, ElimAnnouncementClass);
+		if (ElimAnnouncementWidget)
+		{
+			ElimAnnouncementWidget->SetElimAnnouncementText(Attack, Victim);
+			ElimAnnouncementWidget->AddToViewport();
+		}
 	}
 }
 
