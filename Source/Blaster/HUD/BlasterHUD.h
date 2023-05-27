@@ -48,8 +48,6 @@ public:
 	class UAnnouncement* Announcement;
 	void AddAnnouncement();
 
-	UPROPERTY()
-	class UElimAnnouncement* ElimAnnouncement;
 	void AddElimAnnouncement(FString Attack, FString Victim);
 protected:
 	virtual void BeginPlay() override;
@@ -65,6 +63,15 @@ private:
 
 private:
 	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairsColor);
+
+	UPROPERTY(EditAnywhere)
+	float ElimAnnouncementTime = 5.f;
+
+	UFUNCTION()
+	void ElimAnnouncementTimerFinished(class UElimAnnouncement* MsgToRemove);
+
+	UPROPERTY()
+	TArray<UElimAnnouncement*> ElimMessages;
 
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
