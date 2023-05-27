@@ -44,6 +44,7 @@ void AProjectileWeapon::SpawnProjectile(const FVector_NetQuantize& SocketLocatio
 						SpawnedProjectile = World->SpawnActor<AProjectile>(ProjectileClass, SocketLocation, TargetRotation, SpawnParams);
 						SpawnedProjectile->bUseServerSideRewind = false;
 						SpawnedProjectile->Damage = Damage;
+						SpawnedProjectile->HeadShotDamage = HeadShotDamage;
 					}
 				}
 				else // server, not locally controlled - spawn non-replicated projectile, no SSR
@@ -66,6 +67,7 @@ void AProjectileWeapon::SpawnProjectile(const FVector_NetQuantize& SocketLocatio
 						SpawnedProjectile->TraceStart = SocketLocation;
 						SpawnedProjectile->InitialVelocity = SpawnedProjectile->GetActorForwardVector() * SpawnedProjectile->InitialSpeed;
 						SpawnedProjectile->Damage = Damage;
+						SpawnedProjectile->HeadShotDamage = HeadShotDamage;
 					}
 				}
 				else // client, not locally controlled - spawn non-replicated projectile, no SSR
