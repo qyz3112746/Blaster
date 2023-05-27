@@ -58,8 +58,7 @@ void AHitScanWeapon::Fire(const FVector_NetQuantize& SocketLocation, const FVect
 							BlasterCharacter,
 							SocketLocation,
 							FireHit.ImpactPoint,
-							BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime,
-							this
+							BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime
 						);
 					}
 				}
