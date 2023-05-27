@@ -11,8 +11,6 @@
 #include "WeaponTypes.h"
 #include "Blaster/BlasterComponents/LagCompensationComponent.h"
 
-#include "DrawDebugHelpers.h"
-
 void AHitScanWeapon::Fire(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& HitTarget)
 {
 	Super::Fire(SocketLocation,HitTarget);
@@ -147,8 +145,6 @@ void AHitScanWeapon::WeaponTraceHit(const FVector_NetQuantize& SocketLocation, c
 		{
 			OutHit.ImpactPoint = End;
 		}
-
-		DrawDebugSphere(GetWorld(), OutHit.ImpactPoint, 4.f, 12, FColor::Orange, true);
 
 		FVector BeamEnd = End;
 		if (OutHit.bBlockingHit)
