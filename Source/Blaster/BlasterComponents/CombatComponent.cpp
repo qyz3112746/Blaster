@@ -239,7 +239,7 @@ void UCombatComponent::LocalShotgunFire(const FVector_NetQuantize& SocketLocatio
 		Character->PlayFireMontage(bAiming);
 		Shotgun->FireShotgun(SocketLocation, TraceHitTargets);
 		CombatState = ECombatState::ECS_Unoccupied;
-		return;
+		bLocallyReloading = false;
 	}
 }
 
@@ -406,6 +406,8 @@ void UCombatComponent::SwapWeapons()
 	AWeapon* TempWeapon = EquippedWeapon;
 	EquippedWeapon = SecondaryWeapon;
 	SecondaryWeapon = TempWeapon;
+
+	UpdateCarriedAmmo();
 
 	if (SecondaryWeapon) SecondaryWeapon->EnableCustomDepth(false);
 }
