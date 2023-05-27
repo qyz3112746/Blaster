@@ -24,6 +24,7 @@ void AShotgun::FireShotgun(const FVector_NetQuantize& SocketLocation, const TArr
 	AController* InstigatorController = OwnerPawn->GetController();
 	
 	TMap <ABlasterCharacter*, uint32> HitMap;
+	TMap <ABlasterCharacter*, uint32> HeadShotHitMap;
 
 	for (auto HitTarget : HitTargets)
 	{
@@ -32,15 +33,17 @@ void AShotgun::FireShotgun(const FVector_NetQuantize& SocketLocation, const TArr
 		ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
 		if (BlasterCharacter)
 		{
-			if (HitMap.Contains(BlasterCharacter))
+			const bool bHeadShot = FireHit.BoneName.ToString() == FString("head");
+			if (bHeadShot)
 			{
-				HitMap[BlasterCharacter]++;
+				if (HeadShotHitMap.Contains(BlasterCharacter)) HeadShotHitMap[BlasterCharacter]++;
+				else HeadShotHitMap.Emplace(BlasterCharacter, 1);
 			}
 			else
 			{
-				HitMap.Emplace(BlasterCharacter, 1);
+				if (HitMap.Contains(BlasterCharacter)) HitMap[BlasterCharacter]++;
+				else HitMap.Emplace(BlasterCharacter, 1);
 			}
-
 			if (HitSound)
 			{
 				UGameplayStatics::PlaySoundAtLocation(
@@ -82,21 +85,50 @@ void AShotgun::FireShotgun(const FVector_NetQuantize& SocketLocation, const TArr
 	{
 		return;
 	}
+	// Maps Character hit to total damage
+	TMap <ABlasterCharacter*, float> DamageMap;
+
+	// Calculate body shot damage by multiplying times hit x Damage - shore in DamageMap
 	for (auto HitPair : HitMap)
 	{
 		if (InstigatorController && HitPair.Key)
 		{
+			DamageMap.Emplace(HitPair.Key, Damage * float(HitPair.Value));
+		}
+	}
+
+	// Calculate head shot damage by multiplying times hit x Damage - shore in DamageMap
+	for (auto HitPair : HeadShotHitMap)
+	{
+		if (InstigatorController && HitPair.Key)
+		{
+			if (DamageMap.Contains(HitPair.Key))
+			{
+				DamageMap[HitPair.Key] += HeadShotDamage * float(HitPair.Value);
+			}
+			else
+			{
+				DamageMap.Emplace(HitPair.Key,HeadShotDamage * float(HitPair.Value));
+			}
+		}
+	}
+
+	// Loop through DamageMap to get total damage for each character
+	for (auto DamagePair : DamageMap)
+	{
+		if (InstigatorController && DamagePair.Key)
+		{
+			HitCharacters.Add(DamagePair.Key);
 			if (HasAuthority() && (!bUseServerSideRewind || BlasterOwnerCharacter->IsLocallyControlled()))
 			{
 				UGameplayStatics::ApplyDamage(
-					HitPair.Key,
-					Damage * float(HitPair.Value),
+					DamagePair.Key,
+					DamagePair.Value,
 					InstigatorController,
 					this,
 					UDamageType::StaticClass()
 				);
 			}
-			HitCharacters.Add(HitPair.Key);
 		}
 	}
 	if (bUseServerSideRewind)

@@ -32,11 +32,12 @@ void AHitScanWeapon::Fire(const FVector_NetQuantize& SocketLocation, const FVect
 	{
 		if (InstigatorController)
 		{
-			if (HasAuthority() && !bUseServerSideRewind) // when not use SSR, only the server apply damage
+			if (HasAuthority() && (!bUseServerSideRewind || OwnerPawn->IsLocallyControlled())) // when not use SSR, only the server apply damage
 			{
+				const float DamageToCause = FireHit.BoneName.ToString() == FString("head") ? HeadShotDamage : Damage;
 				UGameplayStatics::ApplyDamage(
 					BlasterCharacter,
-					Damage,
+					DamageToCause,
 					InstigatorController,
 					this,
 					UDamageType::StaticClass()
@@ -59,21 +60,6 @@ void AHitScanWeapon::Fire(const FVector_NetQuantize& SocketLocation, const FVect
 							FireHit.ImpactPoint,
 							BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime,
 							this
-						);
-					}
-				}
-				else // if the server owner the weapon, apply damage
-				{
-					if (BlasterOwnerCharacter && 
-						BlasterOwnerController &&
-						BlasterOwnerCharacter->IsLocallyControlled())
-					{
-						UGameplayStatics::ApplyDamage(
-							BlasterCharacter,
-							Damage,
-							InstigatorController,
-							this,
-							UDamageType::StaticClass()
 						);
 					}
 				}
