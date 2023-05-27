@@ -41,8 +41,6 @@ AWeapon::AWeapon()
 
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
 	PickupWidget->SetupAttachment(RootComponent);
-
-	bUseServerSideRewind = bOriginalUseServerSideRewind;
 }
 
 
@@ -66,12 +64,13 @@ void AWeapon::BeginPlay()
 	AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
 	AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
+
+	bUseServerSideRewind = bOriginalUseServerSideRewind;
 }
 
 void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -124,7 +123,7 @@ void AWeapon::OnWeaponStateSet()
 
 void AWeapon::OnPingTooHigh(bool bPingTooHigh)
 {
-	bUseServerSideRewind = !bPingTooHigh;
+	bUseServerSideRewind = (!bPingTooHigh) && bOriginalUseServerSideRewind;
 }
 
 void AWeapon::OnRep_WeaponState()

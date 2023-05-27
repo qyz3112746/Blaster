@@ -119,6 +119,9 @@ protected:
 	float Damage = 20.f;
 
 	UPROPERTY(EditAnywhere)
+	float HeadShotDamage = 40.f;
+
+	UPROPERTY(EditAnywhere)
 	bool bOriginalUseServerSideRewind = false;
 
 	UPROPERTY(Replicated)
@@ -235,6 +238,7 @@ public:
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 
 	FORCEINLINE float GetDamage() const { return Damage; }
+	FORCEINLINE float GetHeadShotDamage() const { return HeadShotDamage; }
 
 	bool IsEmpty();
 	bool IsFull();
