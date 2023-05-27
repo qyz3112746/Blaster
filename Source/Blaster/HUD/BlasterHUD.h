@@ -40,21 +40,32 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Announcements")
 	TSubclassOf<class UUserWidget> AnnouncementClass;
 
+	UPROPERTY(EditAnywhere, Category = "ElimAnnouncements")
+	TSubclassOf<class UUserWidget> ElimAnnouncementClass;
+
+
 	UPROPERTY()
 	class UAnnouncement* Announcement;
 	void AddAnnouncement();
 
-
+	UPROPERTY()
+	class UElimAnnouncement* ElimAnnouncement;
+	void AddElimAnnouncement(FString Attack, FString Victim);
 protected:
 	virtual void BeginPlay() override;
 
 private:
+	UPROPERTY()
+	APlayerController* OwningPlayer;
+
 	FHUDPackage HUDPackage;
 
 	UPROPERTY(Editanywhere)
 	float CrosshairSpreadMax = 16.f;
+
 private:
 	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairsColor);
+
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 };
