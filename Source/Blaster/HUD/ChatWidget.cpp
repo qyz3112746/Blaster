@@ -10,6 +10,5 @@ void UChatWidget::ReceiveMessage(FString Message)
 	if (ChatScrollBox)
 	{
 		UTextBlock Message;
-
 	}
 }
