@@ -71,6 +71,7 @@ void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABlasterPlayerController, MatchState);
+	DOREPLIFETIME(ABlasterPlayerController, bShowTeamScores);
 }
 
 void ABlasterPlayerController::Tick(float DeltaTime)
@@ -218,6 +219,18 @@ void ABlasterPlayerController::ChatFunction()
 			BlasterHUD->ChatWidget->SetVisibility(ESlateVisibility::Visible);
 		}
 		bChatWidgetHasBeenShown = !bChatWidgetHasBeenShown;
+	}
+}
+
+void ABlasterPlayerController::OnRep_ShowTeamScores()
+{
+	if (bShowTeamScores)
+	{
+		InitTeamScores();
+	}
+	else
+	{
+		HideTeamScores();
 	}
 }
 
@@ -449,6 +462,42 @@ void ABlasterPlayerController::SetHUDGrenades(int32 Grenades)
 	}
 }
 
+void ABlasterPlayerController::SetHUDBlueTeamScore(float Score)
+{
+	BlasterHUD = BlasterHUD == nullptr ? BlasterHUD = Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->BlueTeamScore;
+	if (bHUDValid)
+	{
+		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
+		BlasterHUD->CharacterOverlay->BlueTeamScore->SetText(FText::FromString(ScoreText));
+	}
+	else
+	{
+		bInitializeBlueTeamScore = true;
+		HUDBlueTeamScore = Score;
+	}
+}
+
+void ABlasterPlayerController::SetHUDRedTeamScore(float Score)
+{
+	BlasterHUD = BlasterHUD == nullptr ? BlasterHUD = Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->RedTeamScore;
+	if (bHUDValid)
+	{
+		FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(Score));
+		BlasterHUD->CharacterOverlay->RedTeamScore->SetText(FText::FromString(ScoreText));
+	}
+	else
+	{
+		bInitializeRedTeamScore = true;
+		HUDRedTeamScore = Score;
+	}
+}
+
 void ABlasterPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -517,6 +566,8 @@ void ABlasterPlayerController::PollInit()
 				if (bInitializeDefeats) SetHUDDefeats(HUDDefeats);
 				if (bInitializeWeaponAmmo) SetHUDWeaponAmmo(HUDWeaponAmmo);
 				if (bInitializeCarriedAmmo)	SetHUDCarriedAmmo(HUDCarriedAmmo);
+				if (bInitializeRedTeamScore) SetHUDRedTeamScore(HUDRedTeamScore);
+				if (bInitializeBlueTeamScore) SetHUDBlueTeamScore(HUDBlueTeamScore);
 				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
 				if (BlasterCharacter && BlasterCharacter->GetCombatComponent())
 				{
@@ -563,13 +614,13 @@ void ABlasterPlayerController::ReceivedPlayer()
 
 }
 
-void ABlasterPlayerController::OnMatchStateSet(FName State)
+void ABlasterPlayerController::OnMatchStateSet(FName State, bool bTeamsMatch)
 {
 	MatchState = State;
 
 	if (MatchState == MatchState::InProgress)
 	{
-		HandleMatchHasStarted();
+		HandleMatchHasStarted(bTeamsMatch);
 	}
 	else if (MatchState == MatchState::Cooldown)
 	{
@@ -589,8 +640,12 @@ void ABlasterPlayerController::OnRep_MatchState()
 	}
 }
 
-void ABlasterPlayerController::HandleMatchHasStarted()
+void ABlasterPlayerController::HandleMatchHasStarted(bool bTeamsMatch)
 {
+	if (HasAuthority())
+	{
+		bShowTeamScores = bTeamsMatch;
+	}
 	BlasterHUD = BlasterHUD == nullptr ? BlasterHUD = Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 	if (BlasterHUD)
 	{
@@ -599,6 +654,19 @@ void ABlasterPlayerController::HandleMatchHasStarted()
 		if (BlasterHUD->Announcement)
 		{
 			BlasterHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
+		}
+
+		if (!HasAuthority()) 
+		{
+			return;
+		}
+		if (bTeamsMatch)
+		{
+			InitTeamScores();
+		}
+		else
+		{
+			HideTeamScores();
 		}
 	}
 }
@@ -665,4 +733,28 @@ void ABlasterPlayerController::HandleColldown()
 		BlasterCharacter->bDisableGameplay = true;
 		BlasterCharacter->GetCombatComponent()->FireButtonPressed(false);
 	}
+}
+
+void ABlasterPlayerController::HideTeamScores()
+{
+	BlasterHUD = BlasterHUD == nullptr ? BlasterHUD = Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay;
+	if (bHUDValid)
+	{
+		if (BlasterHUD->CharacterOverlay->BlueTeamScore)
+		{
+			BlasterHUD->CharacterOverlay->BlueTeamScore->SetText(FText());
+		}
+		if (BlasterHUD->CharacterOverlay->RedTeamScore)
+		{
+			BlasterHUD->CharacterOverlay->RedTeamScore->SetText(FText());
+		}
+	}
+}
+
+void ABlasterPlayerController::InitTeamScores()
+{
+	SetHUDBlueTeamScore(0.f);
+	SetHUDRedTeamScore(0.f);
 }
