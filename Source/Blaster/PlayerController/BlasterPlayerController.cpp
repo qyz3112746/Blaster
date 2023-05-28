@@ -4,19 +4,20 @@
 #include "BlasterPlayerController.h"
 #include "Blaster/HUD/BlasterHUD.h"
 #include "Blaster/HUD/CharacterOverlay.h"
+#include "Blaster/HUD/Announcement.h"
+#include "Blaster/HUD/ReturnToMainMenu.h"
+#include "Blaster/HUD/ChatWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Styling/SlateColor.h"
 #include "Net/UnrealNetwork.h"
 #include "Blaster/GameMode/BlasterGameMode.h"
-#include "Blaster/HUD/Announcement.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blaster/BlasterComponents/CombatComponent.h"
 #include "Blaster/GameState/BlasterGameState.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Components/Image.h"
-#include "Blaster/HUD/ReturnToMainMenu.h"
 
 void ABlasterPlayerController::BroadcastElim(APlayerState* Attacker, APlayerState* Victim)
 {
@@ -195,6 +196,31 @@ void ABlasterPlayerController::ShowReturnToMainMenu()
 	}
 }
 
+void ABlasterPlayerController::ChatFunction()
+{
+	BlasterHUD = BlasterHUD == nullptr ? BlasterHUD = Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	bool bChatWidgetIsVaild =
+		BlasterHUD &&
+		BlasterHUD->ChatWidget &&
+		BlasterHUD->ChatWidget->ChatScrollBox &&
+		BlasterHUD->ChatWidget->InputEditableTextBox;
+	if (bChatWidgetIsVaild)
+	{
+		// TODO Send message or show the widget
+		if (bChatWidgetHasBeenShown)
+		{
+			// Send Message
+			BlasterHUD->ChatWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+		else
+		{
+			// Show MessageBox
+			BlasterHUD->ChatWidget->SetVisibility(ESlateVisibility::Visible);
+		}
+		bChatWidgetHasBeenShown = !bChatWidgetHasBeenShown;
+	}
+}
+
 void ABlasterPlayerController::ServerCheckMatchState_Implementation()
 {
 	ABlasterGameMode* GameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
@@ -210,6 +236,7 @@ void ABlasterPlayerController::ServerCheckMatchState_Implementation()
 		if (BlasterHUD && MatchState == MatchState::WaitingToStart)
 		{
 			BlasterHUD->AddAnnouncement();
+			BlasterHUD->AddChatWidget();
 		}
 	}
 }
@@ -225,6 +252,7 @@ void ABlasterPlayerController::ClientJoinMidgame_Implementation(FName StateOfMat
 	if (BlasterHUD && MatchState == MatchState::WaitingToStart)
 	{
 		BlasterHUD->AddAnnouncement();
+		BlasterHUD->AddChatWidget();
 	}
 }
 
@@ -237,6 +265,7 @@ void ABlasterPlayerController::SetupInputComponent()
 	}
 
 	InputComponent->BindAction("Quit", EInputEvent::IE_Pressed, this, &ABlasterPlayerController::ShowReturnToMainMenu);
+	InputComponent->BindAction("Chat", EInputEvent::IE_Pressed, this, &ABlasterPlayerController::ChatFunction);
 }
 
 void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
@@ -566,6 +595,7 @@ void ABlasterPlayerController::HandleMatchHasStarted()
 	if (BlasterHUD)
 	{
 		BlasterHUD->AddCharacterOverlay();
+		BlasterHUD->AddChatWidget();
 		if (BlasterHUD->Announcement)
 		{
 			BlasterHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);

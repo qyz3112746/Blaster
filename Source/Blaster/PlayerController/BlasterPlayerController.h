@@ -80,6 +80,8 @@ protected:
 
 	void ShowReturnToMainMenu();
 
+	void ChatFunction();
+
 	UFUNCTION(Client, Reliable)
 	void ClientElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
 
@@ -144,4 +146,6 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void ServerReportPingStatus(bool bHighPing);
+
+	bool bChatWidgetHasBeenShown = false;
 };
