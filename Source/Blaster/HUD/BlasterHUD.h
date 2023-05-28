@@ -43,12 +43,20 @@ public:
 	UPROPERTY(EditAnywhere, Category = "ElimAnnouncements")
 	TSubclassOf<class UUserWidget> ElimAnnouncementClass;
 
+	UPROPERTY(EditAnywhere, Category = "ElimAnnouncements")
+	TSubclassOf<class UUserWidget> ChatWidgetClass;
+
+	UPROPERTY()
+	class UChatWidget* ChatWidget;
 
 	UPROPERTY()
 	class UAnnouncement* Announcement;
 	void AddAnnouncement();
 
 	void AddElimAnnouncement(FString Attack, FString Victim);
+
+	void AddChatWidget();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -72,6 +80,7 @@ private:
 
 	UPROPERTY()
 	TArray<UElimAnnouncement*> ElimMessages;
+
 
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }

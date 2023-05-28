@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Announcement.h"
 #include "ElimAnnouncement.h"
+#include "ChatWidget.h"
 #include "Components/HorizontalBox.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
@@ -114,6 +115,20 @@ void ABlasterHUD::AddElimAnnouncement(FString Attack, FString Victim)
 				ElimAnnouncementTime,
 				false
 			);
+		}
+	}
+}
+
+void ABlasterHUD::AddChatWidget()
+{
+	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
+	if (OwningPlayer && ChatWidgetClass && ChatWidget == nullptr)
+	{
+		ChatWidget = CreateWidget<UChatWidget>(OwningPlayer, ChatWidgetClass);
+		if (ChatWidget)
+		{
+			ChatWidget->AddToViewport();
+			ChatWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }
