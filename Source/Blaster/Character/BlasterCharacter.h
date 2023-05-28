@@ -329,6 +329,9 @@ private:
 	void StartInitialHUDTimer();
 	void InitialHUDTimerFinished();
 
+	UPROPERTY()
+	class ABlasterGameMode* BlasterGameMode;
+
 private:
 	UFUNCTION()
 	void OnRep_OverLappingWeapon(AWeapon* LastWeapon);
