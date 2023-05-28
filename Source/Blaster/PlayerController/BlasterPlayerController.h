@@ -31,10 +31,15 @@ public:
 	virtual float GetServerTime(); // Synced with server world clock
 	virtual void ReceivedPlayer() override; //Sync with server clock as soon as possible
 
-	void OnMatchStateSet(FName State);
+	void OnMatchStateSet(FName State, bool bTeamsMatch = false);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	void HandleMatchHasStarted();
+	void HandleMatchHasStarted(bool bTeamsMatch = false);
 	void HandleColldown();
+
+	void HideTeamScores();
+	void InitTeamScores();
+	void SetHUDBlueTeamScore(float Score);
+	void SetHUDRedTeamScore(float Score);
 
 	float SingleTripTime = 0.f;
 
@@ -85,6 +90,11 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void ClientElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
 
+	UPROPERTY(ReplicatedUsing = OnRep_ShowTeamScores)
+	bool bShowTeamScores = false;
+
+	UFUNCTION()
+	void OnRep_ShowTeamScores();
 private:
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
@@ -120,6 +130,8 @@ private:
 	bool bInitializeHealth = false;
 	bool bInitializeShield = false;
 	bool bInitializeScore = false;
+	bool bInitializeBlueTeamScore = false;
+	bool bInitializeRedTeamScore = false;
 	bool bInitializeDefeats = false;
 	bool bInitializeGrenades = false;
 	bool bInitializeWeaponAmmo = false;
@@ -129,6 +141,8 @@ private:
 	float HUDShield;
 	float HUDMaxShield;
 	float HUDScore;
+	float HUDBlueTeamScore;
+	float HUDRedTeamScore;
 	int32 HUDCarriedAmmo;
 	int32 HUDWeaponAmmo;
 	int32 HUDDefeats;
