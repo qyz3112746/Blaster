@@ -41,7 +41,7 @@ public:
 	void SetHUDAmmo();
 	void ShowPickupWidget(bool bShowWidget);
 	virtual void Fire(const FVector_NetQuantize& SocketLocation, const FVector_NetQuantize& HitTarget);
-	void Dropped();
+	virtual void Dropped();
 	void SetWeaponState(EWeaponState State);
 	void AddAmmo(int32 AmmoToAdd);
 	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget);
