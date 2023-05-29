@@ -378,5 +378,7 @@ public:
 
 	FORCEINLINE bool IsHoldingTheFlag() const;
 
+	ETeam GetTeam();
+
 	bool IsLocallyReloading();
 };
