@@ -396,6 +396,7 @@ void ABlasterCharacter::Jump()
 	{
 		return;
 	}
+	if (Combat && Combat->bHoldingTheFlag) return;
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -602,6 +603,7 @@ void ABlasterCharacter::GrenadeButtonPressed()
 {
 	if (Combat)
 	{
+		if (Combat->bHoldingTheFlag) return;
 		Combat->ThrowGrenade();
 	}
 }
@@ -614,6 +616,7 @@ void ABlasterCharacter::SwapWeaponsButtonPressed()
 	}
 	if (Combat)
 	{
+		if (Combat->bHoldingTheFlag) return;
 		if(Combat->CombatState == ECombatState::ECS_Unoccupied) ServerSwapWeaponsButtonPressed();
 		bool bSwap = Combat->ShouldSwapWeapon() &&
 			!HasAuthority() &&
@@ -749,6 +752,7 @@ void ABlasterCharacter::EquipButtonPressed()
 	}
 	if (Combat)
 	{
+		if (Combat->bHoldingTheFlag) return;
 		ServerEquipButtonPressed();
 	}
 }
@@ -767,6 +771,7 @@ void ABlasterCharacter::CrouchButtonPressed()
 	{
 		return;
 	}
+	if(Combat && Combat->bHoldingTheFlag) return;
 	if (bIsCrouched)
 	{
 		UnCrouch();
@@ -785,6 +790,7 @@ void ABlasterCharacter::ReloadButtonPressed()
 	}
 	if (Combat)
 	{
+		if (Combat->bHoldingTheFlag) return;
 		Combat->Reload();
 	}
 }
@@ -797,6 +803,7 @@ void ABlasterCharacter::AimButtonPressed()
 	}
 	if (Combat)
 	{
+		if (Combat->bHoldingTheFlag) return;
 		Combat->SetAiming(true);
 	}
 }
@@ -809,6 +816,7 @@ void ABlasterCharacter::AimButtonReleased()
 	}
 	if(Combat)
 	{
+		if (Combat->bHoldingTheFlag) return;
 		Combat->SetAiming(false);
 	}
 }
@@ -909,6 +917,7 @@ void ABlasterCharacter::FireButtonPressed()
 	}
 	if (Combat)
 	{
+		if (Combat->bHoldingTheFlag) return;
 		Combat->FireButtonPressed(true);
 	}
 }
@@ -921,6 +930,7 @@ void ABlasterCharacter::FireButtonReleased()
 	}
 	if (Combat)
 	{
+		if (Combat->bHoldingTheFlag) return;
 		Combat->FireButtonPressed(false);
 	}
 }
