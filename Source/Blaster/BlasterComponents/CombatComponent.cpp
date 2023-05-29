@@ -382,11 +382,7 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 	if (WeaponToEquip->GetWeaponType() == EWeaponType::EWT_Flag)
 	{
-		Character->Crouch();
-		bHoldingTheFlag = true;
-		AttachFlagToLeftHand(WeaponToEquip);
-		WeaponToEquip->SetOwner(Character);
-		WeaponToEquip->SetWeaponState(EWeaponState::EWS_Equipped);
+		EquipTheFlag(WeaponToEquip);
 	}
 	else
 	{
@@ -403,6 +399,16 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		Character->bUseControllerRotationYaw = true;
 	}
 
+}
+
+void UCombatComponent::EquipTheFlag(AWeapon* WeaponToEquip)
+{
+	Character->Crouch();
+	bHoldingTheFlag = true;
+	WeaponToEquip->SetOwner(Character);
+	WeaponToEquip->SetWeaponState(EWeaponState::EWS_Equipped);
+	AttachFlagToLeftHand(WeaponToEquip);
+	TheFlag = WeaponToEquip;
 }
 
 void UCombatComponent::SwapWeapons()

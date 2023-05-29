@@ -185,6 +185,10 @@ void ABlasterCharacter::Elim(bool bPlayerLeftGame)
 	{
 		Combat->SecondaryWeapon->Dropped();
 	}
+	if (Combat && Combat->TheFlag)
+	{
+		Combat->TheFlag->Dropped();
+	}
 	MulticastElim(bPlayerLeftGame);
 }
 

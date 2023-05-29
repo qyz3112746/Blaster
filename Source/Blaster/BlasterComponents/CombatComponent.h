@@ -113,6 +113,7 @@ protected:
 	void ShowAttachedGrenade(bool bShowGrenade);
 	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
 	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
+	void EquipTheFlag(AWeapon* WeaponToEquip);
 
 private:
 	UPROPERTY()
@@ -127,6 +128,9 @@ private:
 
 	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
 	AWeapon* SecondaryWeapon;
+
+	UPROPERTY(Replicated)
+	AWeapon* TheFlag;
 
 	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
 	bool bAiming = false;
