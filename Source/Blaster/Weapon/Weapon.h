@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "WeaponTypes.h"
+#include "Blaster/BlasterTypes/Team.h"
+
 #include "Weapon.generated.h"
 
 UENUM(BlueprintType)
@@ -134,6 +136,9 @@ protected:
 
 	UFUNCTION()
 	void OnPingTooHigh(bool bPingTooHigh);
+
+	UPROPERTY(EditAnywhere)
+	ETeam Team = ETeam::ET_NoTeam;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
