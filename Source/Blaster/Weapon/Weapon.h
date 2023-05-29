@@ -218,6 +218,7 @@ private:
 public:
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
+	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
 
 	FORCEINLINE float GetCrosshairInAirFactor() const { return CrosshairInAirFactor; }
 	FORCEINLINE float GetCrosshairAimFactor() const { return CrosshairAimFactor; }
