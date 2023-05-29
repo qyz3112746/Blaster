@@ -105,6 +105,7 @@ protected:
 	void DropEquippedWeapon();
 	void AttachActorToRightHand(AActor* ActorToAttach);
 	void AttachActorToLeftHand(AActor* ActorToAttach);
+	void AttachFlagToLeftHand(AWeapon* Flag);
 	void AttachActorToBackpack(AActor* ActorToAttach);
 	void UpdateCarriedAmmo();
 	void PlayEquippedWeaponSound(AWeapon* WeaponToEquip);
@@ -263,6 +264,12 @@ private:
 	void UpdateAmmoValues();
 
 	void UpdateShotgunAmmoValues();
+	
+	UPROPERTY(ReplicatedUsing = OnRep_bHoldingTheFlag)
+	bool bHoldingTheFlag = false;
+
+	UFUNCTION()
+	void OnRep_bHoldingTheFlag();
 
 public:	
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }

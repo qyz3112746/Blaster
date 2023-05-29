@@ -30,4 +30,13 @@ private:
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ShellSound;
 
+	UPROPERTY(EditAnywhere)
+	float DestroyTime = 3.f;
+
+	FTimerHandle DestroyTimer;
+
+	void DestroyTimerFinished();
+
+	bool bShouldPlaySound = true;
+
 };
