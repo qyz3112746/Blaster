@@ -36,7 +36,7 @@ void UReturnToMainMenu::MenuSetup()
 	if (GameInstance)
 	{
 		MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
-		if (MultiplayerSessionsSubsystem && !MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.IsBound())
+		if (MultiplayerSessionsSubsystem)
 		{
 			MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.AddDynamic(this, &UReturnToMainMenu::OnDestroySession);
 		}
@@ -55,6 +55,16 @@ bool UReturnToMainMenu::Initialize()
 
 void UReturnToMainMenu::OnDestroySession(bool bWasSuccessful)
 {
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Yellow,
+			FString::Printf(TEXT("UReturnToMainMenu::OnDestroySession(bool bWasSuccessful)"))
+		);
+	}
+
 	if (!bWasSuccessful)
 	{
 		ReturnButton->SetIsEnabled(true);
