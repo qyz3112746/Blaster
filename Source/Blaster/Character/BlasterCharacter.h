@@ -380,6 +380,8 @@ public:
 
 	FORCEINLINE bool IsHoldingTheFlag() const;
 
+	void SetHoldingTheFlag(bool Holding);
+
 	ETeam GetTeam();
 
 	bool IsLocallyReloading();

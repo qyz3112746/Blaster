@@ -430,6 +430,12 @@ void ABlasterCharacter::RotateInPlace(float DeltaTime)
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 		return;
 	}
+	if (Combat && Combat->EquippedWeapon)
+	{
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		bUseControllerRotationYaw = true;
+	}
+
 	if (bDisableGameplay)
 	{
 		bUseControllerRotationYaw = false;
@@ -1220,4 +1226,10 @@ bool ABlasterCharacter::IsHoldingTheFlag() const
 {
 	if (Combat == nullptr) return false;
 	return Combat->bHoldingTheFlag;
+}
+
+void ABlasterCharacter::SetHoldingTheFlag(bool Holding)
+{
+	if (Combat == nullptr) return;
+	Combat->bHoldingTheFlag = Holding;
 }
