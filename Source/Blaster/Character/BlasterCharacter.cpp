@@ -1000,11 +1000,11 @@ void ABlasterCharacter::FireButtonReleased()
 
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
 {
-	if (AO_Yaw > 75.f)
+	if (AO_Yaw > 65.f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Right;
 	}
-	else if (AO_Yaw < -95.f)
+	else if (AO_Yaw < -75.f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Left;
 	}
