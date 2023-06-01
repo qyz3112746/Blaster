@@ -350,6 +350,8 @@ private:
 
 	void CalculateAO_Pitch();
 
+	UFUNCTION(Client, Reliable)
+	void ClientSetSpawnRotation(AActor* SpawnPoint);
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped();

@@ -44,6 +44,7 @@ void AProjectile::BeginPlay()
 		);
 	}
 
+	CollisionBox->MoveIgnoreActors.Add(Cast<ABlasterCharacter>(GetOwner()));
 	if (HasAuthority())
 	{
 		CollisionBox->OnComponentHit.AddDynamic(this,&AProjectile::OnHit);

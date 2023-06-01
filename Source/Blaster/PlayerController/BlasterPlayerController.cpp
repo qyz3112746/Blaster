@@ -19,10 +19,57 @@
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Components/Image.h"
 #include "Blaster/BlasterTypes/Announcement.h"
+#include "Components/Listview.h"
+#include "Components/EditableTextBox.h"
+#include "TimerManager.h"
 
 void ABlasterPlayerController::BroadcastElim(APlayerState* Attacker, APlayerState* Victim)
 {
 	ClientElimAnnouncement(Attacker, Victim);
+}
+
+void ABlasterPlayerController::SendMessage(const FText& Message)
+{
+	if (!Message.IsEmpty())
+	{
+		ServerSendMessage(Message, this);
+	}
+	bCloseMessageBox = true;
+}
+
+void ABlasterPlayerController::ServerSendMessage_Implementation(const FText& Message, ABlasterPlayerController* Speaker)
+{
+	FString NewMessage;
+	if (Speaker && Speaker->PlayerState)
+	{
+		NewMessage.Append(Speaker->PlayerState->GetName());
+	}
+	NewMessage.Append(": ");
+	NewMessage.Append(Message.ToString());
+	int32 Times = 1;
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+	{
+		ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*It);
+		if (BlasterPlayer)
+		{
+			BlasterPlayer->ClientReceiveMessage(FText::FromString(NewMessage));
+		}
+	}
+}
+
+void ABlasterPlayerController::ClientReceiveMessage_Implementation(const FText& Message)
+{
+	BlasterHUD = BlasterHUD == nullptr ? BlasterHUD = Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	bool bChatWidgetIsVaild =
+		BlasterHUD &&
+		BlasterHUD->ChatWidget &&
+		BlasterHUD->ChatWidget->ChatListView;
+	if (bChatWidgetIsVaild)
+	{
+		BlasterHUD->ChatWidget->SetVisibility(ESlateVisibility::Visible);
+		BlasterHUD->ChatWidget->ReceiveMessage(Message);
+		MessageTimerStart();
+	}
 }
 
 void ABlasterPlayerController::ClientElimAnnouncement_Implementation(APlayerState* Attacker, APlayerState* Victim)
@@ -204,23 +251,39 @@ void ABlasterPlayerController::ChatFunction()
 	bool bChatWidgetIsVaild =
 		BlasterHUD &&
 		BlasterHUD->ChatWidget &&
-		BlasterHUD->ChatWidget->ChatScrollBox &&
-		BlasterHUD->ChatWidget->InputEditableTextBox;
+		BlasterHUD->ChatWidget->ChatInputBox &&
+		BlasterHUD->ChatWidget->ChatListView;
 	if (bChatWidgetIsVaild)
 	{
-		// TODO Send message or show the widget
-		if (bChatWidgetHasBeenShown)
-		{
-			// Send Message
-			BlasterHUD->ChatWidget->SetVisibility(ESlateVisibility::Hidden);
-		}
-		else
-		{
-			// Show MessageBox
-			BlasterHUD->ChatWidget->SetVisibility(ESlateVisibility::Visible);
-		}
-		bChatWidgetHasBeenShown = !bChatWidgetHasBeenShown;
+		BlasterHUD->ChatWidget->SetVisibility(ESlateVisibility::Visible);
+		BlasterHUD->ChatWidget->ChatListView->ScrollToBottom();
+		BlasterHUD->ChatWidget->ChatInputBox->SetFocus();
+		SetInputMode(FInputModeGameAndUI());
+		bCloseMessageBox = false;
 	}
+}
+
+void ABlasterPlayerController::MessageTimerFinished()
+{
+	if (bCloseMessageBox)
+	{
+		BlasterHUD->ChatWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else
+	{
+		MessageTimerStart();
+	}
+}
+
+void ABlasterPlayerController::MessageTimerStart()
+{
+	GetWorldTimerManager().SetTimer(
+		MessageTimer,
+		this,
+		&ABlasterPlayerController::MessageTimerFinished,
+		MessageTime,
+		false
+	);
 }
 
 void ABlasterPlayerController::OnRep_ShowTeamScores()
@@ -277,7 +340,6 @@ void ABlasterPlayerController::SetupInputComponent()
 	{
 		return;
 	}
-
 	InputComponent->BindAction("Quit", EInputEvent::IE_Pressed, this, &ABlasterPlayerController::ShowReturnToMainMenu);
 	InputComponent->BindAction("Chat", EInputEvent::IE_Pressed, this, &ABlasterPlayerController::ChatFunction);
 }

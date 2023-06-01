@@ -46,6 +46,16 @@ public:
 	FHighPingDelegate HighPingDelegate;
 
 	void BroadcastElim(class APlayerState* Attacker, APlayerState* Victim);
+
+	void SendMessage(const FText& Message);
+	
+	UFUNCTION(Server, Reliable)
+	void ServerSendMessage(const FText& Message, ABlasterPlayerController* Speaker);
+
+	UFUNCTION(Client, Reliable)
+	void ClientReceiveMessage(const FText& Message);
+
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -165,4 +175,15 @@ private:
 	void ServerReportPingStatus(bool bHighPing);
 
 	bool bChatWidgetHasBeenShown = false;
+
+
+	UPROPERTY()
+	FTimerHandle MessageTimer;
+
+	void MessageTimerFinished();
+	void MessageTimerStart();
+	UPROPERTY(EditAnywhere)
+	float MessageTime = 4.f;
+
+	bool bCloseMessageBox = true;
 };

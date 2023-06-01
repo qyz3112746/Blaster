@@ -13,12 +13,23 @@ UCLASS()
 class BLASTER_API UChatWidget : public UUserWidget
 {
 	GENERATED_BODY()
+protected:
+	virtual void NativeConstruct() override;
+
+	UFUNCTION()
+	void SendMessage(const FText& Text, ETextCommit::Type CommitMethod);
 public:
-	UPROPERTY(meta = (BindWidget))
-	class UScrollBox* ChatScrollBox;
+	void ReceiveMessage(FText Message);
 
-	UPROPERTY(meta = (BindWidget))
-	class UEditableTextBox* InputEditableTextBox;
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	class UListView* ChatListView;
 
-	void ReceiveMessage(FString Message);
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	class UEditableTextBox* ChatInputBox;
+
+	UPROPERTY(BlueprintReadWrite)
+	class UItemData* CurrentItem;
+
+	UPROPERTY()
+	class ABlasterPlayerController* Controller;
 };
