@@ -119,11 +119,15 @@ void AHitScanWeapon::WeaponTraceHit(const FVector_NetQuantize& SocketLocation, c
 	{
 		FVector End = SocketLocation + (HitTarget - SocketLocation) * 1.25f;
 
+		FCollisionQueryParams TraceParams;
+		TraceParams.AddIgnoredActor(Cast<ABlasterCharacter>(GetOwner()));
+
 		bool bHit = World->LineTraceSingleByChannel(
 			OutHit,
 			SocketLocation,
 			End,
-			ECollisionChannel::ECC_Visibility
+			ECollisionChannel::ECC_Visibility,
+			TraceParams
 		);
 
 		if (!bHit)

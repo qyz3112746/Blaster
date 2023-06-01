@@ -209,7 +209,7 @@ private:
 	// Incremented in SpendRound, decremented in ClientUpdateAmmo.
 	int32 Sequence = 0;
 
-	UFUNCTION(Client, Reliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void ClientAddAmmo(int32 AmmoToAdd);
 
 	void SpendRound();

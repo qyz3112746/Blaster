@@ -172,7 +172,7 @@ ABlasterCharacter::ABlasterCharacter()
 void ABlasterCharacter::OnRep_ReplicatedMovement()
 {
 	Super::OnRep_ReplicatedMovement();
-	SimProxiesTurn();
+	// SimProxiesTurn();
 	TimeSinceLastMovementReplication = 0.f;
 }
 
@@ -402,12 +402,17 @@ void ABlasterCharacter::Jump()
 		return;
 	}
 	if (Combat && Combat->bHoldingTheFlag) return;
+
 	if (bIsCrouched)
 	{
 		UnCrouch();
 	}
 	else
 	{
+		if (Combat && Combat->bAiming)
+		{
+			Combat->SetAiming(false);
+		}
 		Super::Jump();
 	}
 }
@@ -443,19 +448,21 @@ void ABlasterCharacter::RotateInPlace(float DeltaTime)
 		return;
 	}
 
-	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
-	{
-		AimOffset(DeltaTime);
-	}
-	else
-	{
-		TimeSinceLastMovementReplication += DeltaTime;
-		if (TimeSinceLastMovementReplication > 0.25f)
-		{
-			OnRep_ReplicatedMovement();
-		}
-		CalculateAO_Pitch();
-	}
+	AimOffset(DeltaTime);
+
+	//if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
+	//{
+	//	AimOffset(DeltaTime);
+	//}
+	//else
+	//{
+	//	TimeSinceLastMovementReplication += DeltaTime;
+	//	if (TimeSinceLastMovementReplication > 0.25f)
+	//	{
+	//		OnRep_ReplicatedMovement();
+	//	}
+	//	CalculateAO_Pitch();
+	//}
 }
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -673,7 +680,10 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 
 	if (Damage > 0.f)
 	{
-		PlayHitReactMontage();
+		if (Combat && Combat->CombatState == ECombatState::ECS_Unoccupied && !Combat->bLocallyReloading)
+		{
+			PlayHitReactMontage();
+		}
 	}
 	
 	if (Health == 0.f)
@@ -732,7 +742,17 @@ void ABlasterCharacter::SetSpawnPoint()
 				ChosenPlayerStart->GetActorLocation(),
 				ChosenPlayerStart->GetActorRotation()
 			);
+
+			ClientSetSpawnRotation(ChosenPlayerStart);
 		}
+	}
+}
+
+void ABlasterCharacter::ClientSetSpawnRotation_Implementation(AActor* SpawnPoint)
+{
+	if (Controller)
+	{
+		Controller->SetControlRotation(SpawnPoint->GetActorRotation());
 	}
 }
 
@@ -844,7 +864,7 @@ void ABlasterCharacter::AimButtonPressed()
 	{
 		return;
 	}
-	if (Combat)
+	if (Combat && Combat->EquippedWeapon && Combat->CombatState == ECombatState::ECS_Unoccupied)
 	{
 		if (Combat->bHoldingTheFlag) return;
 		Combat->SetAiming(true);
@@ -857,7 +877,7 @@ void ABlasterCharacter::AimButtonReleased()
 	{
 		return;
 	}
-	if(Combat)
+	if(Combat && Combat->EquippedWeapon && Combat->CombatState == ECombatState::ECS_Unoccupied && Combat->bAiming)
 	{
 		if (Combat->bHoldingTheFlag) return;
 		Combat->SetAiming(false);
@@ -980,11 +1000,11 @@ void ABlasterCharacter::FireButtonReleased()
 
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
 {
-	if (AO_Yaw > 85.f)
+	if (AO_Yaw > 75.f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Right;
 	}
-	else if (AO_Yaw < -85.f)
+	else if (AO_Yaw < -95.f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Left;
 	}
@@ -1040,7 +1060,10 @@ void ABlasterCharacter::OnRep_Health(float LastHealth)
 	UpdateHUDHealth();
 	if (Health < LastHealth)
 	{
-		PlayHitReactMontage();
+		if (Combat && Combat->CombatState == ECombatState::ECS_Unoccupied && !Combat->bLocallyReloading)
+		{
+			PlayHitReactMontage();
+		}
 	}
 }
 
@@ -1049,7 +1072,10 @@ void ABlasterCharacter::OnRep_Shield(float LastShield)
 	UpdateHUDShield();
 	if (Shield < LastShield)
 	{
-		PlayHitReactMontage();
+		if (Combat && Combat->CombatState == ECombatState::ECS_Unoccupied && !Combat->bLocallyReloading)
+		{
+			PlayHitReactMontage();
+		}
 	}
 }
 
@@ -1191,6 +1217,7 @@ void ABlasterCharacter::InitialHUDTimerFinished()
 	UpdateHUDShield();
 	UpdateHUDAmmo();
 	UpdateHUDGrenade();
+
 }
 
 ECombatState ABlasterCharacter::GetCombatState() const

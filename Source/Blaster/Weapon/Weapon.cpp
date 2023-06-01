@@ -253,7 +253,11 @@ void AWeapon::SpendRound()
 	}
 	else
 	{
-		Sequence++;
+		BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+		if (BlasterOwnerCharacter->IsLocallyControlled())
+		{
+			Sequence++;
+		}
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Sequence : %d"), Sequence);
 }

@@ -33,6 +33,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
 	DOREPLIFETIME(UCombatComponent, SecondaryWeapon);
+	DOREPLIFETIME(UCombatComponent, TheFlag);
 	DOREPLIFETIME(UCombatComponent, bAiming);
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(UCombatComponent, CombatState);
@@ -394,7 +395,6 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		{
 			EquipPrimaryWeapon(WeaponToEquip);
 		}
-
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 	}
@@ -564,6 +564,10 @@ void UCombatComponent::Reload()
 		!EquippedWeapon->IsFull()
 		)
 	{
+		if (bAiming)
+		{
+			SetAiming(false);
+		}
 		ServerReload();
 		HandleReload();
 		bLocallyReloading = true;
@@ -680,7 +684,7 @@ void UCombatComponent::ThrowGrenade()
 	{
 		return;
 	}
-	if (CombatState != ECombatState::ECS_Unoccupied || EquippedWeapon == nullptr)
+	if (CombatState != ECombatState::ECS_Unoccupied || EquippedWeapon == nullptr || bLocallyReloading)
 	{
 		return;
 	}
