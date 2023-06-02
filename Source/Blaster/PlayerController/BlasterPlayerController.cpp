@@ -42,7 +42,7 @@ void ABlasterPlayerController::ServerSendMessage_Implementation(const FText& Mes
 	FString NewMessage;
 	if (Speaker && Speaker->PlayerState)
 	{
-		NewMessage.Append(Speaker->PlayerState->GetName());
+		NewMessage.Append(Speaker->PlayerState->GetPlayerName());
 	}
 	NewMessage.Append(": ");
 	NewMessage.Append(Message.ToString());
