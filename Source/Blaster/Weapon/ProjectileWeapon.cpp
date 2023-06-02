@@ -60,6 +60,7 @@ void AProjectileWeapon::SpawnProjectile(const FVector_NetQuantize& SocketLocatio
 			{
 				if (InstigatorPawn->IsLocallyControlled()) // client, locally controlled - spawn non-replicated projectile, use SSR
 				{
+					UE_LOG(LogTemp, Warning, TEXT("client, using SSR"));
 					if (ServerSideRewindProjectileClass)
 					{
 						SpawnedProjectile = World->SpawnActor<AProjectile>(ServerSideRewindProjectileClass, SocketLocation, TargetRotation, SpawnParams);

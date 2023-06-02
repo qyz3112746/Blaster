@@ -162,8 +162,9 @@ void AWeapon::OnEquipped()
 	if (BlasterOwnerCharacter && bOriginalUseServerSideRewind)
 	{
 		BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(BlasterOwnerCharacter->Controller) : BlasterOwnerController;
-		if (BlasterOwnerController && HasAuthority() && !BlasterOwnerController->HighPingDelegate.IsBound())
+		if (BlasterOwnerController && HasAuthority())
 		{
+			bUseServerSideRewind = bOriginalUseServerSideRewind;
 			UE_LOG(LogTemp, Warning, TEXT("Add delegate on Equipped"));
 			BlasterOwnerController->HighPingDelegate.AddDynamic(this, &AWeapon::OnPingTooHigh);
 		}
@@ -196,7 +197,6 @@ void AWeapon::OnEquippedSecondary()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Remove delegate on Equipped Secondary State"));
 			BlasterOwnerController->HighPingDelegate.RemoveDynamic(this, &AWeapon::OnPingTooHigh);
-			bUseServerSideRewind = bOriginalUseServerSideRewind;
 		}
 	}
 }
@@ -225,7 +225,6 @@ void AWeapon::OnDropped()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Remove delegate on Dropped"));
 			BlasterOwnerController->HighPingDelegate.RemoveDynamic(this, &AWeapon::OnPingTooHigh);
-			bUseServerSideRewind = bOriginalUseServerSideRewind;
 		}
 	}
 }
